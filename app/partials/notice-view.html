@@ -1,0 +1,27 @@
+<div id="NoticeView" ng-controller="NoticeViewCtrl">
+    
+    <table class="table-contract">
+    
+		<!-- local part -->
+		<tr class='tr-local'>
+	    	<td class='td-label'>{{'description' | transl}}</td>
+	    	<td>{{localnoticedescription.text}}</td>
+		</tr>
+	    	
+		<tr class='tr-local'>
+	    	<td class='td-label'>{{'title' | transl}}</td>
+	    	<td>{{localnoticetitle.text}}</td>
+		</tr>
+	    	
+	    	
+ 		<!-- chain part -->
+  		<tr class='tr-chain'>
+	    	<td class='td-label'>{{'book title' | transl}}</td>
+	    	<td>{{chainnoticetitle.text}}</td>
+		</tr>
+	    	
+	    	
+    
+    </table>
+
+</div>

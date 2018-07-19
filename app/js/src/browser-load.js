@@ -1,0 +1,98 @@
+var rootscriptloader = window.ScriptLoader.getScriptLoader('rootloader');
+
+//include all global js files here 
+rootscriptloader.push_script('./js/src/config.js');
+rootscriptloader.push_script('./js/src/constants.js');
+rootscriptloader.push_script('./js/includes/common/global.js');
+rootscriptloader.push_script('./js/src/xtra/xtra-config.js');
+
+
+// perform load
+rootscriptloader.load_scripts();
+
+
+//libs
+var libscriptloader = rootscriptloader.getChildLoader('libloader');
+
+//jquery
+libscriptloader.push_script('./js/lib/jquery-3.1.0.js');
+
+libscriptloader.push_script('./js/lib/bootstrap.min-3.3.7.js');
+
+libscriptloader.push_script('./js/lib/web3-0.20.3.js');
+libscriptloader.push_script('./js/lib/truffle-contract-1.1.11.js');
+
+libscriptloader.push_script('./js/lib/ethereumjs-all-2017-10-31.min.js');
+libscriptloader.push_script('./js/lib/keythereum.min-1.0.2.js');
+libscriptloader.push_script('./js/lib/bitcore.min-0.11.7.js');
+libscriptloader.push_script('./js/lib/bitcore-ecies.min-0.9.2.js');
+
+// interfaces to abstract the previous libs
+libscriptloader.push_script('./js/lib/ethereum-node-access.js');
+libscriptloader.push_script('./js/lib/account-encryption.js');
+
+
+//perform load
+libscriptloader.load_scripts();
+
+
+
+// modules
+var modulescriptloader = libscriptloader.getChildLoader('moduleloader');
+
+// common
+modulescriptloader.push_script('./js/includes/common/module.js');
+//chain reader
+modulescriptloader.push_script('./js/includes/chainreader/module.js');
+
+//noticebook
+modulescriptloader.push_script('./js/src/includes/noticebook/module.js');
+
+//perform load
+modulescriptloader.load_scripts();
+
+
+
+//app
+var angularscriptloader = modulescriptloader.getChildLoader('angularloader');
+
+//angular
+var angular_app;
+
+angularscriptloader.push_script('./js/lib/angular-1.6.9.js');
+//angularscriptloader.push_script('./js/lib/angular-1.7.0.js');
+
+angularscriptloader.push_script('./js/lib/ui-bootstrap-2.5.0.js');
+
+angularscriptloader.push_script('./js/lib/angular-ui-router-1.0.18.js');
+
+angularscriptloader.push_script('./js/lib/angular-breadcrumb-0.5.0.js');
+
+//perform load
+angularscriptloader.load_scripts();
+
+//mvc
+var mvcscriptloader = angularscriptloader.getChildLoader('mvcloader');
+
+mvcscriptloader.push_script('./js/src/module.js', 
+	function() {
+		var global = GlobalClass.getGlobalObject();	
+		
+		var allmodulesscriptloader = global.loadModule('mvc', modulescriptloader, function() {
+			// and finally loading the app
+			var appscriptloader = allmodulesscriptloader.getChildLoader('apploader');
+			
+			appscriptloader.push_script('./js/app.js');
+
+			//perform load
+			appscriptloader.load_scripts();
+		});
+		
+	});
+
+//perform load
+mvcscriptloader.load_scripts();
+
+
+
+

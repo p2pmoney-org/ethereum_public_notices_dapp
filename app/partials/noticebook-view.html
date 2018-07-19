@@ -1,0 +1,40 @@
+<div id="NoticeBookView" ng-controller="NoticeBookViewCtrl">
+    
+    <table class="table-contract">
+    
+		<!-- local part -->
+		<tr class='tr-local'>
+	    	<td class='td-label'>{{'description' | transl}}</td>
+	    	<td>{{localdescription.text}}</td>
+		</tr>
+	    	
+ 		<tr class='tr-local'>
+	    	<td class='td-label'>{{'contract address' | transl}}</td>
+	    	<td>{{address.text}}</td>
+		</tr>
+	    	
+ 		<tr class='tr-local'>
+	    	<td class='td-label'>{{'owner address' | transl}}</td>
+	    	<td>{{localowner.text}}</td>
+		</tr>
+	    	
+  		<tr class='tr-local'>
+	    	<td class='td-label'>{{'book title' | transl}}</td>
+	    	<td>{{localbooktitle.text}}</td>
+		</tr>
+	    	
+ 		<!-- chain part -->
+  		<tr class='tr-chain'>
+	    	<td class='td-label'>{{'book title' | transl}}</td>
+	    	<td>{{chainbooktitle.text}}</td>
+		</tr>
+	    	
+   		<tr class='tr-chain'>
+	    	<td class='td-label'>{{'number of notices published' | transl}}</td>
+	    	<td><a ui-sref="home.noticebooks.notices({index: noticebookindex})">{{chainnoticecount.text}}</a></td>
+		</tr>
+	    	
+    
+    </table>
+
+</div>

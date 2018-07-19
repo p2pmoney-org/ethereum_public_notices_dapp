@@ -1,0 +1,22 @@
+<div id="login-link-div" ng-controller="NoticeOnTheWireListViewCtrl">
+
+<table class="table-contract-list">
+<tr><td>{{'Current block is:' | transl}}</td><td>{{blocknumber}}</td></tr>
+<tr><td>{{'Gas used is:' | transl}}</td><td>{{gasUsed}}</td></tr>
+</table>
+
+<table class="table-contract-list">
+	<tr>
+		<td>{{'Hash' | transl}}</td>
+		<td>{{'Time' | transl}}</td>
+		<td>{{'Type' | transl}}</td>
+	</tr>
+	
+	<tr ng-repeat="transaction in transactions">
+		<td>{{transaction.hash}}</td>
+		<td>{{transaction.time}}</td>
+		<td>{{transaction.TxType}}</td>
+	</tr>
+</table>
+
+</div>

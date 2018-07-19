@@ -1,0 +1,43 @@
+
+
+ <form name="noticebookcreationForm" ng-controller="NoticeBookCreateFormCtrl" ng-submit="handleSubmit()">
+ 
+  	<div>
+	
+	<span>
+		<label for="description">{{'Description:' | transl}}</label>
+		<input type="text" name="description" ng-model="description.text" required>
+		
+ 	</span>
+ 	
+  	<span class="form-actions">
+            <button type="submit" >{{'Create' || transl}}</button>
+	</span>
+ 
+    </div>
+ 
+ 	<div>
+	
+	<span>
+		<label for="booktitle">{{'Title:' | transl}}</label>
+		<input type="text" name="booktitle" ng-model="booktitle.text" required>
+		
+ 	</span>
+	
+ 	<span>
+	    <label for="owner">{{'Owner:' | transl}}</label>
+	    <input type="text" name="owner" ng-model="owner.text" required>
+	    
+ 	</span>
+    
+ 	</div>
+    
+    <div role="alert">
+      <span class="error" ng-show="emailForm.input.$error.required">
+        Required!</span>
+      <span class="error" ng-show="emailForm.input.$error.email">
+        Not valid email!</span>
+    </div>
+ 	
+ </form>
+

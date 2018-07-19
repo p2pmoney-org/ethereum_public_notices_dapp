@@ -1,0 +1,41 @@
+<nav class="menubar">
+    <div class="container">
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                
+                 <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">{{'Notice Books' | transl}}<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a ui-sref="home.noticebooks">{{'My list' | transl}}</a>
+                        </li>
+                        <li><a ui-sref="home.noticebooks.create">{{'Create' | transl}}</a>
+                        </li>
+                        <li><a ui-sref="home.noticebooks.import">{{'Import' | transl}}</a>
+                        </li>
+                    </ul>
+                </li>
+                 
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown">{{'My account' | transl}} <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li><a ui-sref="home.account"">{{'Info' | transl}}</a>
+                        </li>
+                        <li><a href="#!/account/login">{{'Login' | transl}}</a>
+                        </li>
+                    </ul>
+                </li>
+                
+				<li>
+                    <a class="dropdown-toggle" data-toggle="dropdown" ui-sref="home.about">{{'About' | transl}}</a>
+                </li>
+  
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+        
+        
+    </div>
+    <!-- /.container -->
+</nav>

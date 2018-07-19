@@ -1,0 +1,40 @@
+
+<div id="NoticesView" ng-controller="NoticesViewCtrl">
+    
+    <table class="table-contract-list">
+    
+		<tr>
+	    	<td>{{'title' | transl}}</td>
+	     	<td>{{'notice type' | transl}}</td>
+	     	<td>{{'status' | transl}}</td>
+	     	<td>{{'order id' | transl}}</td>
+	     	<td>{{'reference id' | transl}}</td>
+  	    	<td>&nbsp;</td>
+    	</tr>
+        
+		<!-- local notices --> 
+        <tr ng-repeat="notice in localnotices" class="{{$odd ? 'table-contract-list-tr-local-odd' : 'table-contract-list-tr-local-even'}}">
+			<td><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
+			<!-- 
+			<td><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
+			-->
+			<td>{{notice.noticetype}}</td>
+			<td>{{notice.statusstring}}</td>
+	     	<td>{{notice.orderid}}</td>
+			<td>{{notice.referenceid}}</td>
+	        <td class="table-contract-list-action-td"><a ui-sref="home.noticebooks.notices.delete({index: noticebookindex, number: notice.number})">{{'remove from list' | transl}}</a></td>
+        </tr>
+    
+		<!-- chain (published) notices --> 
+        <tr ng-repeat="notice in chainnotices" class="{{$odd ? 'table-contract-list-tr-chain-odd' : 'table-contract-list-tr-chain-even'}}">
+			<td><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
+			<td>{{notice.noticetype}}</td>
+			<td>{{notice.statusstring}}</td>
+ 			<td>{{notice.orderid}}</td>
+ 			<td>{{notice.referenceid}}</td>
+ 			<td>&nbsp;</td>
+        </tr>
+
+    </table>
+
+</div>

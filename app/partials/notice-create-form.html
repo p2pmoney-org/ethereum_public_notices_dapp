@@ -1,0 +1,43 @@
+ <form name="noticecreationForm" ng-controller="NoticeCreateFormCtrl" ng-submit="handleSubmit()">
+ 
+ 	<input type="hidden" name="index" ng-model="noticebookindex" required>
+ 
+  	<div>
+	
+	<span>
+		<label for="title">{{'Title:' | transl}}</label>
+		<input type="text" name="title" ng-model="noticetitle.text" required>
+		
+ 	</span>
+ 	
+  	<span class="form-actions">
+            <button type="submit" >{{'Create' || transl}}</button>
+	</span>
+ 
+    </div>
+    
+    <div>
+	<span>
+		<label for="title">{{'Description:' | transl}}</label>
+		<input type="text" name="description" ng-model="noticedescription.text" required>
+		
+ 	</span>
+    </div>
+ 
+ 	<div>
+	
+	<span>
+		<label for="content">{{'Title:' | transl}}</label>
+		<textarea cols="80" rows="15" name="content" ng-model="noticecontent.text"></textarea>
+ 	</span>
+	
+ 	</div>
+    
+    <div role="alert">
+      <span class="error" ng-show="emailForm.input.$error.required">
+        Required!</span>
+      <span class="error" ng-show="emailForm.input.$error.email">
+        Not valid email!</span>
+    </div>
+ 	
+ </form>
