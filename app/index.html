@@ -5,28 +5,28 @@
  
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
    
-	<link href="css/app.css" rel="stylesheet">
+	<link href="./angular-ui/css/app.css" rel="stylesheet">
  
   <!-- App source code -->
-  <script type="text/javascript" src="./js/includes/bootstrap.js"></script>
+  <script type="text/javascript" src="./includes/bootstrap.js"></script>
 
 </head>
 <body>
 
-	<div ng-include='"./templates/header.html"'></div>
-	<div ng-include='"./templates/menubar.html"'></div>
-	<div ng-include='"./templates/breadcrumb.html"'></div>
+	<div ng-include='"./angular-ui/templates/header.html"'></div>
+	<div ng-include='"./angular-ui/templates/menubar.html"'></div>
+	<div ng-include='"./angular-ui/templates/breadcrumb.html"'></div>
     
 	<!-- <div ng-view></div>ng-view -->
 	<div ui-view='main'></div><!-- ui-view -->
 	
 <!--<hr>
 	
-	<div ng-include='"./templates/test.html"'></div>
+	<div ng-include='"./angular-ui/templates/test.html"'></div>
 
 <hr>	-->
 
-	<div ng-include='"./templates/footer.html"'></div>
+	<div ng-include='"./angular-ui/templates/footer.html"'></div>
 	
 </body>
 </html>

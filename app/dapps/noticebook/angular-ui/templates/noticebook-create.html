@@ -1,0 +1,42 @@
+<div class="container">
+
+<h2>{{'Create New Notice Book' | transl}}</h2>
+
+<div id="form-band" class="form-band">
+
+<div class="div-form-container">
+
+<div class="div-form-tabs">
+	<div class="div-form-tab"><span><a ui-sref="home.noticebooks.import">{{'Import book' | transl}}</a></span></div>
+	<div class="div-form-selected-tab"><span>{{'Create book' | transl}}</span></div>
+</div>
+
+ 
+<div class="div-form">
+
+<div ng-include='"./dapps/noticebook/angular-ui/partials/noticebook-create-form.html"'></div>
+
+</div><!-- div-form -->
+
+<!-- cue messages (e.g. wallet balance -->
+<div class="div-form-cue"></div>
+
+</div><!-- div-form-container -->
+
+</div><!-- form-band -->
+
+<div class="band-separator"><hr></div>
+
+<div id="view-band" class="view-band">
+
+<div class="div-view-container" >
+
+<div ng-include='"./dapps/noticebook/angular-ui/partials/noticebook-list-view.html"'></div>
+
+</div><!-- div-view-container -->
+
+</div><!-- view-band -->
+
+
+
+</div><!-- /.container -->

@@ -82,7 +82,10 @@ Config.defaultGasPrice = 100000000000;
 Config.web3provider_port = 9547;
 Config.need_to_unlock_accounts = false;
 Config.wallet_account_challenge = true;
-Config.wallet_account = '0x6330A553Fc93768F612722BB8c2eC78aC90B3bbc';
+//Ganache 1.0.1
+//Config.wallet_account = '0x6330A553Fc93768F612722BB8c2eC78aC90B3bbc';
+//Ganache 1.1.0
+Config.wallet_account = '0xfFA2808E37954fF5042a98103068b42f22f0f733';
 
 
 // Geth

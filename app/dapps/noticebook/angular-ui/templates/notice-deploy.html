@@ -1,0 +1,43 @@
+<div class="container">
+
+<h2>{{'Deploy Notice' | transl}}</h2>
+
+<div id="form-band" class="form-band">
+
+<div class="div-form-container" ng-controller="NoticeDeployFormCtrl" >
+
+<div class="div-form-tabs">
+	<div class="div-form-selected-tab"><span><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: noticeindex})">{{'Modify notice' | transl}}</a></span></div>
+	<div class="div-form-tab"><span>{{'Publish notice' | transl}}</span></div>
+</div>
+
+
+<div class="div-form">
+
+<div ng-include='"./dapps/noticebook/angular-ui/partials/notice-deploy-form.html"'></div>
+
+</div><!-- div-form -->
+
+<!-- cue messages (e.g. wallet balance -->
+<div class="div-form-cue"></div>
+
+</div><!-- div-form-container -->
+
+</div><!-- form-band -->
+
+
+<div class="band-separator"><hr></div>
+
+<div id="view-band" class="view-band">
+
+<div class="div-view-container" >
+
+<div ng-include='"./dapps/noticebook/angular-ui/partials/notice-view.html"'></div>
+
+</div><!-- div-view-container -->
+
+</div><!-- view-band -->
+
+
+
+</div><!-- /.container -->
