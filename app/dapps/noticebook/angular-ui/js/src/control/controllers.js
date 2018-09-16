@@ -121,6 +121,10 @@ var DAPPControllers = class {
 			return controllers.getModifyNoticeRef();
 		});
 		
+		angular_app.directive('ckeditor', function(){
+	        return controllers.getCKEditor();
+	    });
+		
 		//
 		// registering notice types
 		//
@@ -161,7 +165,7 @@ var DAPPControllers = class {
 	        ncyBreadcrumb: { label: global.t('Delete') }})
 	    .state('home.noticebooks.notices', {url: '/notices/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/public-notices.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Notices') }})
-	    .state('home.noticebooks.notices.create', {url: '/create', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-create.html', controller: "PageRequestHandler",}},
+	    .state('home.noticebooks.notices.create', {url: '/create/:type', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-create.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Create') }})
 	    .state('home.noticebooks.notices.modify', {url: '/modify/:number', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-modify.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Modify') }})
@@ -494,7 +498,34 @@ var DAPPControllers = class {
 		var self = this;
 	    var global = this.global;
 		
+	    //
+	    // plugins
+	    //
+	    var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
+	    
+	    var noticebookplugins = noticebookdappmodule.getPlugins();
+	    var plugins = [];
+	    
+	    for (var i = 0; i < noticebookplugins.length; i++) {
+	    	var noticebookplugin = noticebookplugins[i];
+	    	var plugin = {};
+	    	
+	    	plugin.type = noticebookplugin.type;
+	    	plugin.label = noticebookplugin.getCreateListTypeLabel();
+	    	plugin.path = (noticebookplugin.getCreateFormPath ? noticebookplugin.getCreateFormPath() : null);
+	    	
+	    	if (plugin.path)
+	    	plugins.push(plugin);
+	    }
+	    
+	    $scope.plugins = plugins;
+	    
+	    
+	    //
+	    // list
+	    //
 	    var noticebookmodule = global.getModuleObject('noticebook');
+	    
 		
 		//var mvcmodule = global.getModuleObject('mvc');
 		var views = this.noticebookviews;
@@ -1069,6 +1100,7 @@ var DAPPControllers = class {
 		var self = this;
 
 	    var contractindex = $stateParams.index;
+	    var noticetype = $stateParams.type;
 
 		// call module controller
 		var global = this.global;
@@ -1082,6 +1114,21 @@ var DAPPControllers = class {
 			$scope.noticebookindex = noticebookcontract.getContractIndex();
 			
 		}
+		
+	    var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
+		var noticeplugin = noticebookdappmodule.getPlugin(noticetype);
+		
+		noticeplugin = (noticeplugin && noticeplugin.getCreateFormPath && noticeplugin.prepareNoticeCreateForm ? noticeplugin : noticebookdappmodule.getPlugin('simple'));
+		
+		var plugin = {};
+		
+    	plugin.type = noticeplugin.type;
+		plugin.path = noticeplugin.getCreateFormPath();
+		
+		$scope.plugin = plugin;
+		
+		// ask plugin to prepare what it needs for its form
+		noticeplugin.prepareNoticeCreateForm($scope, $state, $stateParams);
 		
 		  
 		// submit function
@@ -1111,21 +1158,26 @@ var DAPPControllers = class {
 		var noticebookcontract = noticebookcontrollers.getPublicNoticeBookFromKey(contractindex);
 		
 		if (noticebookcontract) {
-			var noticetype = 'simple';
-			
+			var type = $scope.noticetype;
 			var title = $scope.noticetitle.text;
 			var description = $scope.noticedescription.text;
 			var content = $scope.noticecontent.text;
 			
-			var jsoncontent = {plaintext: content};
-			var jsoncontentstring = JSON.stringify(jsoncontent);
+			var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
+			var noticeplugin = noticebookdappmodule.getPlugin(type);
 			
+			noticeplugin = (noticeplugin && noticeplugin.handleNoticeCreateForm ? noticeplugin : noticebookdappmodule.getPlugin('simple'));
+
+			
+			// create notice and add to the book
 			var notice = noticebookmodule.createBlankPublicNoticeObject(session, noticebookcontract);
 			
 			notice.setLocalNoticeType(noticetype);
 			notice.setLocalTitle(title);
 			notice.setLocalDescription(description);
-			notice.setLocalJsonContent(jsoncontent);
+			
+			// ask plugin to save what it needs in the notice object
+			noticeplugin.handleNoticeCreateForm($scope, notice);
 			
 			noticebookcontract.addLocalNotice(notice);
 			
@@ -1162,10 +1214,22 @@ var DAPPControllers = class {
 		    	$scope.noticedescription = { text: notice.getLocalDescription()};
 		    	$scope.noticetitle = { text: notice.getLocalTitle()};
 				
-		    	var jsoncontent = notice.getLocalJsonContent();
-		    	var content = jsoncontent.plaintext;
-		    	
-		    	$scope.noticecontent = { text: content};
+				$scope.noticetype = notice.getLocalNoticeType();
+			    
+			    var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
+				var noticeplugin = noticebookdappmodule.getPlugin(noticetype);
+				
+				noticeplugin = (noticeplugin && noticeplugin.getModifyFormPath && noticeplugin.prepareNoticeModifyForm ? noticeplugin : noticebookdappmodule.getPlugin('simple'));
+				
+				var plugin = {};
+				
+		    	plugin.type = noticeplugin.type;
+				plugin.path = noticeplugin.getModifyFormPath();
+
+				$scope.plugin = plugin;
+				
+				// ask plugin to prepare what it needs for its form
+				noticeplugin.prepareNoticeModifyForm($scope, $state, $stateParams, notice);
 		    }
 		    
 		}
@@ -1201,17 +1265,22 @@ var DAPPControllers = class {
 		    var notice = noticebookcontract.getNoticeFromKey(noticeindex);
 		    
 		    if (notice) {
+				var type = notice.getType();
+				
 				var title = $scope.noticetitle.text;
 				var description = $scope.noticedescription.text;
-				var content = $scope.noticecontent.text;
 				
-				var jsoncontent = {plaintext: content};
-				var jsoncontentstring = JSON.stringify(jsoncontent);
+				var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
+				var noticeplugin = noticebookdappmodule.getPlugin(type);
 				
+				noticeplugin = (noticeplugin && noticeplugin.handleNoticeModifyForm ? noticeplugin : noticebookdappmodule.getPlugin('simple'));
+
 				notice.setLocalTitle(title);
 				notice.setLocalDescription(description);
-				notice.setLocalJsonContent(jsoncontent);
 				
+				// ask plugin to save what it needs in the notice object
+				noticeplugin.handleNoticeModifyForm($scope, notice);
+
 				noticebookcontrollers.savePublicNoticeObject(notice);
 		    	
 		    }
@@ -1395,10 +1464,49 @@ var DAPPControllers = class {
 		}
 	}
 	
+	getCKEditor(){  
+		console.log("Controllers.getCKEditor called");
+		
+		var self = this;
+		
+		return {
+			restrict: "A",
+			require: '?ngModel',
+            link: function ($scope, $elem, $attrs, $ngModel) {
+            	var textarea = $elem[0];
+            		
+            	var ck = CKEDITOR.replace(textarea);
+                
+                if (!$ngModel) return;
+                
+                ck.on('instanceReady', function () {
+                    ck.setData($ngModel.$viewValue);
+                });
+
+                function updateModel() {
+                    $scope.$apply(function () {
+                    	var html = ck.getData();
+                    	
+                    	$ngModel.$setViewValue(html);
+                    	
+                    	$scope.noticeplaintext = html;
+                    });
+                };
+                  
+                ck.on('change', updateModel);
+                ck.on('key', updateModel);
+                ck.on('dataReady', updateModel);
+                
+                $ngModel.$render = function (value) {
+                    ck.setData($ngModel.$viewValue);
+                };           
+            }
+		}
+	}
 
 }
 
 if ( typeof window !== 'undefined' && window )
-GlobalClass.registerModuleClass('dapps', 'NoticeBookAngularControllers', DAPPControllers);
+GlobalClass.registerModuleClass('noticebook-dapp', 'NoticeBookAngularControllers', DAPPControllers);
 else
 module.exports = DAPPControllers; // we are in node js

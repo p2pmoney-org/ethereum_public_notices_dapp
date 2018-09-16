@@ -120,4 +120,4 @@ var Module = class {
 GlobalClass.getGlobalObject().registerModuleObject(new Module());
 
 // dependencies
-GlobalClass.getGlobalObject().registerModuleDepency('noticebook', 'dapps');
+GlobalClass.getGlobalObject().registerModuleDepency('noticebook', 'noticebook-dapp');

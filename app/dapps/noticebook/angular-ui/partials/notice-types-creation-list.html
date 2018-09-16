@@ -1,6 +1,8 @@
-<div id="NoticeBookNoticeCreationList" ng-controller="NoticeBookViewCtrl">
+<div id="NoticeBookNoticeCreationList" ng-controller="NoticesViewCtrl">
 <ul>
-	<li><a ui-sref="home.noticebooks.notices.create({index: noticebookindex})">{{'Create simple public notice' | transl}}</a></li>
 
-</ul>
+<li ng-repeat="plugin in plugins">
+
+<a ui-sref="home.noticebooks.notices.create({index: noticebookindex, type: plugin.type})">{{plugin.label}}</a>
+
 </div>

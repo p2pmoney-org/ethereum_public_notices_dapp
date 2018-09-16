@@ -21,8 +21,8 @@ var Module = class {
 		var global = this.global;
 		
 		// create controllers
-		var noticebookcontrollers = new this.NoticeBookAngularControllers(global);
-		this.angularcontrollers.push(noticebookcontrollers);
+		//var noticebookcontrollers = new this.NoticeBookAngularControllers(global);
+		//this.angularcontrollers.push(noticebookcontrollers);
 		
 		this.isready = true;
 	}
@@ -44,13 +44,7 @@ var Module = class {
 		var moduleroot = './dapps';
 
 		//noticebook
-		/*modulescriptloader.push_script( moduleroot + '/noticebook/includes/module.js', function() {
-			global.loadModule('noticebook', modulescriptloader);
-		 });*/
-
-
-		modulescriptloader.push_script( moduleroot + '/noticebook/angular-ui/js/src/control/controllers.js');
-		modulescriptloader.push_script( moduleroot + '/noticebook/angular-ui/js/src/view/views.js');
+		//modulescriptloader.push_script( moduleroot + '/noticebook/module.js');
 
 		
 		modulescriptloader.load_scripts(function() { self.init(); if (callback) callback(null, self); });
@@ -64,12 +58,16 @@ var Module = class {
 		console.log('registerDappsModules called for ' + this.name);
 		
 		var dappsscriptloader = global.findScriptLoader('dappmodulesloader');
+		var dappsmodelsloader = modulescriptloader.getChildLoader('dappsmodelsloader');
 
 		var moduleroot = './dapps';
 
-		//noticebook
-		dappsscriptloader.push_script( moduleroot + '/noticebook/includes/module.js', function() {
-			global.loadModule('noticebook', modulescriptloader);
+		//noticebook dapp
+		dappsscriptloader.push_script( moduleroot + '/noticebook/module.js', function() {
+			global.loadModule('noticebook-dapp', modulescriptloader);
+			
+			// then load models
+			dappsmodelsloader.load_scripts();
 		 });
 		
 	}
@@ -152,6 +150,10 @@ var Module = class {
 	// functions
 	getAngularControllers() {
 		return this.angularcontrollers;	
+	}
+	
+	pushAngularController(angularcontroller) {
+		this.angularcontrollers.push(angularcontroller);
 	}
 	
 

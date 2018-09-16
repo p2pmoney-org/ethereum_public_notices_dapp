@@ -1,0 +1,232 @@
+{
+  "contractName": "BaseContract",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "contract_version",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "contract_name",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506101dc806100206000396000f30060806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063b32c65c814610051578063d94796921461007c575b600080fd5b34801561005d57600080fd5b5061006661010c565b6040518082815260200191505060405180910390f35b34801561008857600080fd5b50610091610112565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156100d15780820151818401526020810190506100b6565b50505050905090810190601f1680156100fe5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60015481565b60008054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156101a85780601f1061017d576101008083540402835291602001916101a8565b820191906000526020600020905b81548152906001019060200180831161018b57829003601f168201915b5050505050815600a165627a7a723058200bc5f7423c241039d249fac24fb81a7e0e9aae972016640f96ce9ac5bcc9f2f70029",
+  "deployedBytecode": "0x60806040526004361061004c576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff168063b32c65c814610051578063d94796921461007c575b600080fd5b34801561005d57600080fd5b5061006661010c565b6040518082815260200191505060405180910390f35b34801561008857600080fd5b50610091610112565b6040518080602001828103825283818151815260200191508051906020019080838360005b838110156100d15780820151818401526020810190506100b6565b50505050905090810190601f1680156100fe5780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60015481565b60008054600181600116156101000203166002900480601f0160208091040260200160405190810160405280929190818152602001828054600181600116156101000203166002900480156101a85780601f1061017d576101008083540402835291602001916101a8565b820191906000526020600020905b81548152906001019060200180831161018b57829003601f168201915b5050505050815600a165627a7a723058200bc5f7423c241039d249fac24fb81a7e0e9aae972016640f96ce9ac5bcc9f2f70029",
+  "sourceMap": "26:86:0:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;26:86:0;;;;;;;",
+  "deployedSourceMap": "26:86:0:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;81:28;;8:9:-1;5:2;;;30:1;27;20:12;5:2;81:28:0;;;;;;;;;;;;;;;;;;;;;;;51:27;;8:9:-1;5:2;;;30:1;27;20:12;5:2;51:27:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;23:1:-1;8:100;33:3;30:1;27:10;8:100;;;99:1;94:3;90:11;84:18;80:1;75:3;71:11;64:39;52:2;49:1;45:10;40:15;;8:100;;;12:14;51:27:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;81:28;;;;:::o;51:27::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::o",
+  "source": "pragma solidity ^0.4.24;\n\ncontract BaseContract {\n\tstring public contract_name;\n\tuint public contract_version;\n}",
+  "sourcePath": "/home/frederic/home/p2pmoney-dev/var/lib/git/repos/solidity/ethereum_public_notices_dapp/contracts/BaseContract.sol",
+  "ast": {
+    "absolutePath": "/home/frederic/home/p2pmoney-dev/var/lib/git/repos/solidity/ethereum_public_notices_dapp/contracts/BaseContract.sol",
+    "exportedSymbols": {
+      "BaseContract": [
+        6
+      ]
+    },
+    "id": 7,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 6,
+        "linearizedBaseContracts": [
+          6
+        ],
+        "name": "BaseContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 3,
+            "name": "contract_name",
+            "nodeType": "VariableDeclaration",
+            "scope": 6,
+            "src": "51:27:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_storage",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "51:6:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 5,
+            "name": "contract_version",
+            "nodeType": "VariableDeclaration",
+            "scope": 6,
+            "src": "81:28:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 4,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "81:4:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7,
+        "src": "26:86:0"
+      }
+    ],
+    "src": "0:112:0"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/frederic/home/p2pmoney-dev/var/lib/git/repos/solidity/ethereum_public_notices_dapp/contracts/BaseContract.sol",
+    "exportedSymbols": {
+      "BaseContract": [
+        6
+      ]
+    },
+    "id": 7,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "^",
+          "0.4",
+          ".24"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 6,
+        "linearizedBaseContracts": [
+          6
+        ],
+        "name": "BaseContract",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 3,
+            "name": "contract_name",
+            "nodeType": "VariableDeclaration",
+            "scope": 6,
+            "src": "51:27:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_string_storage",
+              "typeString": "string"
+            },
+            "typeName": {
+              "id": 2,
+              "name": "string",
+              "nodeType": "ElementaryTypeName",
+              "src": "51:6:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_string_storage_ptr",
+                "typeString": "string"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "id": 5,
+            "name": "contract_version",
+            "nodeType": "VariableDeclaration",
+            "scope": 6,
+            "src": "81:28:0",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 4,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "81:4:0",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "value": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 7,
+        "src": "26:86:0"
+      }
+    ],
+    "src": "0:112:0"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "2.0.0",
+  "updatedAt": "2018-07-11T17:07:30.055Z"
+}

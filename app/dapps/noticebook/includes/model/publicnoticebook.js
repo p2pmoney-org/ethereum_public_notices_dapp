@@ -485,7 +485,7 @@ var PublicNoticeBook = class {
 	deploy(payingaccount, owningaccount, gas, gasPrice, callback) {
 		var self = this;
 		var session = this.session;
-		var EthereumNodeAccess = session.getEthereumNodeAccessInstance();
+		//var EthereumNodeAccess = session.getEthereumNodeAccessInstance();
 
 		var fromaddress = payingaccount.getAddress();
 		

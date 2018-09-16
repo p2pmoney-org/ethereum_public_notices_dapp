@@ -1,6 +1,7 @@
  <form name="noticecreationForm" ng-controller="NoticeCreateFormCtrl" ng-submit="handleSubmit()">
  
  	<input type="hidden" name="index" ng-model="noticebookindex" required>
+  	<input type="hidden" name="noticetype" ng-model="noticetype" required>
  
   	<div>
 	
@@ -27,17 +28,10 @@
  	<div>
 	
 	<span>
-		<label for="content">{{'Title:' | transl}}</label>
+		<label for="content">{{'Content:' | transl}}</label>
 		<textarea cols="80" rows="15" name="content" ng-model="noticecontent.text"></textarea>
  	</span>
-	
+ 	
  	</div>
     
-    <div role="alert">
-      <span class="error" ng-show="emailForm.input.$error.required">
-        Required!</span>
-      <span class="error" ng-show="emailForm.input.$error.email">
-        Not valid email!</span>
-    </div>
- 	
  </form>
