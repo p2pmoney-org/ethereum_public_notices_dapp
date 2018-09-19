@@ -15,9 +15,7 @@
 		<!-- local notices --> 
         <tr ng-repeat="notice in localnotices" class="{{$odd ? 'table-contract-list-tr-local-odd' : 'table-contract-list-tr-local-even'}}">
 			<td><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
-			<!-- 
-			<td><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
-			-->
+			
 			<td>{{notice.noticetype}}</td>
 			<td>{{notice.statusstring}}</td>
 	     	<td>{{notice.orderid}}</td>
@@ -27,7 +25,8 @@
     
 		<!-- chain (published) notices --> 
         <tr ng-repeat="notice in chainnotices" class="{{$odd ? 'table-contract-list-tr-chain-odd' : 'table-contract-list-tr-chain-even'}}">
-			<td><a ui-sref="home.noticebooks.notices.modify({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
+			<td><a ui-sref="home.noticebooks.notices.view({index: noticebookindex, number: notice.number})">{{notice.title}}</a></td>
+			
 			<td>{{notice.noticetype}}</td>
 			<td>{{notice.statusstring}}</td>
  			<td>{{notice.orderid}}</td>

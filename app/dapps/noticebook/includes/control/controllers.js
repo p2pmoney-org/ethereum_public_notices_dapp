@@ -6,6 +6,7 @@ var ModuleControllers = class {
 		this.module = module;
 	}
 	
+	// notice books
 	createPublicNoticeBookObject(data) {
 		console.log("Controllers.createPublicNoticeContract called");
 		
@@ -60,13 +61,6 @@ var ModuleControllers = class {
 
 	}
 
-	savePublicNoticeObject(notice) {
-		if (!notice)
-			return;
-		
-		notice.saveLocalJson();
-	}
-
 	savePublicNoticeBooks() {
 		var module = this.module;
 		var global = module.global;
@@ -93,6 +87,15 @@ var ModuleControllers = class {
 		
 		return contract;
 	}
+	
+	// notices
+	savePublicNoticeObject(notice) {
+		if (!notice)
+			return;
+		
+		notice.saveLocalJson();
+	}
+
 }
 
 GlobalClass.registerModuleClass('noticebook', 'Controllers', ModuleControllers);

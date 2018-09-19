@@ -14,6 +14,12 @@ var DAPPControllers = class {
 		this.noticebookviews = new NoticeBookViews(global);
 	}
 	
+	getAngularControllers() {
+		var mvcmodule = this.global.getModuleObject('mvc');
+		
+		return mvcmodule.getControllersObject();
+	}
+	
 	registerControllers(app) {
 		var global = this.global;
 		
@@ -44,13 +50,17 @@ var DAPPControllers = class {
 		}]);
 		
 		// list of notices
+		angular_app.controller("NoticesPluginsCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+			controllers.prepareNoticesPlugins($scope, $state, $stateParams);
+		}]);
+		
 		angular_app.controller("NoticesViewCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
 			controllers.prepareNoticesView($scope, $state, $stateParams);
 		}]);
 		
 		// notice view
-		angular_app.controller("NoticeViewCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
-			controllers.prepareNoticeView($scope, $state, $stateParams);
+		angular_app.controller("NoticeViewCtrl",  ['$scope', '$state', '$stateParams', '$sce', function ($scope, $state, $stateParams, $sce) {
+			controllers.prepareNoticeView($scope, $state, $stateParams, $sce);
 		}]);
 		
 		
@@ -161,6 +171,8 @@ var DAPPControllers = class {
 	        ncyBreadcrumb: { label: global.t('Modify') }})
 	    .state('home.noticebooks.deploy', {url: '/deploy/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-deploy.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Publish') }})
+	    .state('home.noticebooks.view', {url: '/view/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-view.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('View') }})
 	    .state('home.noticebooks.delete', {url: '/delete/:index', views: {'main@': {controller: "NoticeBookRemoveRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Delete') }})
 	    .state('home.noticebooks.notices', {url: '/notices/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/public-notices.html', controller: "PageRequestHandler",}},
@@ -171,6 +183,8 @@ var DAPPControllers = class {
 	        ncyBreadcrumb: { label: global.t('Modify') }})
 	    .state('home.noticebooks.notices.deploy', {url: '/deploy/:number', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-deploy.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Publish') }})
+	    .state('home.noticebooks.notices.view', {url: '/view/:number', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-view.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('View') }})
 	    .state('home.noticebooks.notices.delete', {url: '/delete/:number', views: {'main@': {controller: "NoticeRemoveRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Delete') }})
 	}
@@ -209,7 +223,7 @@ var DAPPControllers = class {
 			alert(contractindex + 'not found');
 		}
 		
-		this.gotoStatePage('home.noticebooks');
+		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 		  
 	handleRemoveNoticeRequestFromList($scope, $state, $stateParams) {
@@ -244,9 +258,8 @@ var DAPPControllers = class {
 		    }
 			
 		}
-	    
 		
-		this.gotoStatePage('home.noticebooks.notices', {index: contractindex});
+		this.getAngularControllers().gotoStatePage('home.noticebooks.notices', {index: contractindex});
 	}
 	
 
@@ -332,7 +345,7 @@ var DAPPControllers = class {
 		
 		var global = this.global;
 		var commonmodule = global.getModuleObject('common');
-		var contracts = commonmodule.getContractsObject(true);
+		var session = commonmodule.getSessionObject();
 		
 		//var mvcmodule = global.getModuleObject('mvc');
 		var views = this.noticebookviews;
@@ -340,7 +353,11 @@ var DAPPControllers = class {
 		// local contracts
 		var localnoticebooks = [];
 		
-		var localnoticebookarray = contracts.getLocalOnlyContractObjects();
+		//var contracts = commonmodule.getContractsObject(true);
+		//var localnoticebookarray = contracts.getLocalOnlyContractObjects();
+		
+		var noticebookmodule = global.getModuleObject('noticebook');
+		var localnoticebookarray = noticebookmodule.getLocalPublicNoticeBooks(session, true);
 		
 		if (localnoticebookarray) {
 			for (var i = 0; i < localnoticebookarray.length; i++) {
@@ -360,7 +377,8 @@ var DAPPControllers = class {
 		// chain contracts
 		var chainnoticebooks = [];
 		
-		var chainnoticebookarray = contracts.getChainContractObjects();
+		//var chainnoticebookarray = contracts.getChainContractObjects();
+		var chainnoticebookarray = noticebookmodule.getChainPublicNoticeBooks(session, false);
 		
 		if (chainnoticebookarray) {
 			for (var i = 0; i < chainnoticebookarray.length; i++) {
@@ -392,6 +410,10 @@ var DAPPControllers = class {
 		if (noticebookcontract) {
 			$scope.noticebookindex = noticebookcontract.getContractIndex();
 			$scope.isLocalOnly = noticebookcontract.isLocalOnly();
+			
+			$scope.noticebookuuid = {
+					text: noticebookcontract.getUUID()
+			};	
 			
 			// local part
 			$scope.address = {
@@ -430,11 +452,29 @@ var DAPPControllers = class {
 			if (noticebookcontract.isLocalOnly() == false)
 				writebooktitle(noticebookcontract);
 
+			// owner
+			$scope.chainowneraddress = {
+					text: (noticebookcontract.isLocalOnly() ? global.t('not deployed yet') : global.t('loading'))
+			};
+			
+			var writeowneraddress = function (contract) {
+				return contract.getChainOwner(function(err, res) {
+					if (res) $scope.chainowneraddress.text = res;
+					
+					if (err) $scope.chainowneraddress.text = global.t('not found');
+					
+					$scope.$apply();
+				})
+			};
+
+			if (noticebookcontract.isLocalOnly() == false)
+				writeowneraddress(noticebookcontract);
+		
+			// number of notices
 			$scope.chainnoticecount = {
 					text: (noticebookcontract.isLocalOnly() ? global.t('not deployed yet') : global.t('loading'))
 			};
 			
-			// number of notices
 			var writenoticecount = function (contract) {
 				return contract.getChainNoticeCount(function(err, res) {
 					if (res) $scope.chainnoticecount.text = res;
@@ -460,7 +500,7 @@ var DAPPControllers = class {
 		if (noticebookcontract) {
 
 			var localnoticesarray = noticebookcontract.getLocalNotices();
-			console.log()
+			console.log('localnoticesarray count is ' + localnoticesarray.length);
 			
 			for (var i=0; i < localnoticesarray.length; i++) {
 				var localnotice = localnoticesarray[i];
@@ -470,12 +510,14 @@ var DAPPControllers = class {
 				var statusstring = views.getPublicNoticeStatusString(localnotice);
 				
 				var number = localnotice.getNoticeIndex();
+				var noticeuuid = localnotice.getUUID();
 				var title = localnotice.getLocalTitle();
 				var noticetype = localnotice.getLocalNoticeType();
 				var orderid = localnotice.getChainPosition();
 				var referenceid = localnotice.getLocalReferenceID();
 				
 				notice.isLocalOnly = true;
+				notice.uuid = noticeuuid;
 				notice.statusstring = statusstring;
 				notice.number = number;
 				notice.title = (title ? title : global.t('no title'));
@@ -490,14 +532,21 @@ var DAPPControllers = class {
 		return localnotices;
 	}
 	
-	prepareNoticesView($scope, $state, $stateParams) {
-		console.log("Controllers.prepareNoticesView called");
+	prepareNoticesPlugins($scope, $state, $stateParams, $sce) {
+		console.log("Controllers.prepareNoticesPlugins called");
 		
 	    var contractindex = $stateParams.index;
 
-		var self = this;
 	    var global = this.global;
+	    
+	    // noticebook
+	    var noticebookmodule = global.getModuleObject('noticebook');
+		var noticebookcontrollers = noticebookmodule.getControllersObject();
 		
+		var noticebookcontract = noticebookcontrollers.getPublicNoticeBookFromKey(contractindex);
+		
+		$scope.noticebookindex = (noticebookcontract ? noticebookcontract.getContractIndex() : null);
+
 	    //
 	    // plugins
 	    //
@@ -520,21 +569,31 @@ var DAPPControllers = class {
 	    
 	    $scope.plugins = plugins;
 	    
+	}
+		
+	prepareNoticesView($scope, $state, $stateParams) {
+		console.log("Controllers.prepareNoticesView called");
+		
+	    var contractindex = $stateParams.index;
+
+		var self = this;
+	    var global = this.global;
+		
 	    
-	    //
-	    // list
-	    //
+	    // noticebook
 	    var noticebookmodule = global.getModuleObject('noticebook');
-	    
-		
-		//var mvcmodule = global.getModuleObject('mvc');
-		var views = this.noticebookviews;
-		
 		var noticebookcontrollers = noticebookmodule.getControllersObject();
 		
 		var noticebookcontract = noticebookcontrollers.getPublicNoticeBookFromKey(contractindex);
 		
 		$scope.noticebookindex = (noticebookcontract ? noticebookcontract.getContractIndex() : null);
+
+		//
+	    // list
+		//var mvcmodule = global.getModuleObject('mvc');
+		var views = this.noticebookviews;
+		
+	    //
 
 		// local
 		var localnotices = this._getLocalNoticeArray(views, noticebookcontract);
@@ -554,6 +613,13 @@ var DAPPControllers = class {
 					if (res) {
 						console.log('list is returned with ' + res.length + ' elements');
 						var chainarray = res;
+						
+						// grow viewarray if chainarray is longer
+						while(chainarray.length > viewarray.length) {
+							var notice = [];
+							
+							viewarray.push(notice);
+						}
 						
 						// in reverse order to have most recent on top
 						for (var i = chainarray.length - 1; i >=0; i--) {
@@ -622,7 +688,7 @@ var DAPPControllers = class {
 		$scope.chainnotices = chainnotices;
 	}
 		
-	prepareNoticeView($scope, $state, $stateParams) {
+	prepareNoticeView($scope, $state, $stateParams, $sce) {
 		console.log("Controllers.prepareNoticeView called");
 		
 	    var contractindex = $stateParams.index;
@@ -637,22 +703,51 @@ var DAPPControllers = class {
 		if (noticebookcontract) {
 			$scope.noticebookindex = noticebookcontract.getContractIndex();
 			
-			var noticearay = [];
-			
 		    var noticeindex = $stateParams.number;
 		    var notice = noticebookcontract.getNoticeFromKey(noticeindex);
 		    
 		    if (notice) {
-		    	$scope.isLocalOnly = notice.isLocalOnly();
+				$scope.isLocalOnly = notice.isLocalOnly();
 		    	
-		    	$scope.localnoticedescription = { text: notice.getLocalDescription()};
-		    	$scope.localnoticetitle = { text: notice.getLocalTitle()};
-		    	
-		    	$scope.chainnoticetitle = { text: global.t('local only')};
-		    	
-		    	if (!notice.isLocalOnly()) {
-		    		$scope.chainnoticetitle.text = global.t('loading...');
+				$scope.noticetype = ( $scope.isLocalOnly ? notice.getLocalNoticeType() : notice.getChainNoticeType());
+
+	    		$scope.noticeuuid = { text: notice.getUUID()};
+	    		
+	    		if (notice.isLocalOnly()) {
+		    		$scope.localnoticetype = { text: notice.getLocalNoticeType()};
+		    		$scope.localnoticedescription = { text: notice.getLocalDescription()};
+			    	$scope.localnoticetitle = { text: notice.getLocalTitle()};
+			    	$scope.localreferenceid = { text: notice.getLocalReferenceID()};
+			    	
+			    	$scope.chainnoticetype = { text: global.t('local only')};
+			    	$scope.chainnoticetitle = { text: global.t('local only')};
+			    	$scope.chainreferenceid = { text: global.t('local only')};
 		    	}
+		    	else {
+		    		$scope.localnoticetype = { text: global.t('deployed')};
+		    		$scope.localnoticedescription = { text: global.t('deployed')};
+			    	$scope.localnoticetitle = { text: global.t('deployed')};
+			    	$scope.localreferenceid = { text: global.t('deployed')};
+			    	
+			    	$scope.chainnoticetype = { text: notice.getChainNoticeType()};
+			    	$scope.chainnoticetitle = { text: notice.getChainTitle()};
+			    	$scope.chainreferenceid = { text: notice.getChainReferenceID()};
+		    	}
+
+			    var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
+				var noticeplugin = noticebookdappmodule.getPlugin($scope.noticetype);
+				
+				noticeplugin = (noticeplugin ? noticeplugin : noticebookdappmodule.getPlugin('simple'));
+				
+				var plugin = {};
+				
+		    	plugin.type = noticeplugin.type;
+				plugin.path = noticeplugin.getViewPath();
+
+				$scope.plugin = plugin;
+				
+				// ask plugin to prepare what it needs for its form
+				noticeplugin.prepareNoticeView(notice, $scope, $state, $stateParams, $sce);
 		    }
 		    
 		}
@@ -820,6 +915,8 @@ var DAPPControllers = class {
 		
 		// save noticebook
 		noticebookcontrollers.savePublicNoticeBookObject(noticebook);
+		
+		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 	
 	// notice import
@@ -891,6 +988,7 @@ var DAPPControllers = class {
 			});
 		}
 		
+		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 
 	// notice modification
@@ -963,6 +1061,8 @@ var DAPPControllers = class {
 		
 		// save noticebook
 		noticebookcontrollers.savePublicNoticeBookObject(noticebook);
+		
+		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 	
 	// notice modification
@@ -1158,7 +1258,7 @@ var DAPPControllers = class {
 		var noticebookcontract = noticebookcontrollers.getPublicNoticeBookFromKey(contractindex);
 		
 		if (noticebookcontract) {
-			var type = $scope.noticetype;
+			var type = ($scope.noticetype ? $scope.noticetype : 'simple');
 			var title = $scope.noticetitle.text;
 			var description = $scope.noticedescription.text;
 			var content = $scope.noticecontent.text;
@@ -1172,18 +1272,20 @@ var DAPPControllers = class {
 			// create notice and add to the book
 			var notice = noticebookmodule.createBlankPublicNoticeObject(session, noticebookcontract);
 			
-			notice.setLocalNoticeType(noticetype);
+			notice.setLocalNoticeType(type);
 			notice.setLocalTitle(title);
 			notice.setLocalDescription(description);
 			
 			// ask plugin to save what it needs in the notice object
-			noticeplugin.handleNoticeCreateForm($scope, notice);
+			noticeplugin.handleNoticeCreateForm(notice, $scope);
 			
 			noticebookcontract.addLocalNotice(notice);
 			
 			// save noticebook
 			noticebookcontrollers.savePublicNoticeBookObject(noticebookcontract);
 		}
+		
+		this.getAngularControllers().gotoStatePage('home.noticebooks.notices', {index: contractindex});
 	}
 
 	prepareNoticeModifyForm($scope, $state, $stateParams) {
@@ -1217,7 +1319,7 @@ var DAPPControllers = class {
 				$scope.noticetype = notice.getLocalNoticeType();
 			    
 			    var noticebookdappmodule = global.getModuleObject('noticebook-dapp');
-				var noticeplugin = noticebookdappmodule.getPlugin(noticetype);
+				var noticeplugin = noticebookdappmodule.getPlugin($scope.noticetype);
 				
 				noticeplugin = (noticeplugin && noticeplugin.getModifyFormPath && noticeplugin.prepareNoticeModifyForm ? noticeplugin : noticebookdappmodule.getPlugin('simple'));
 				
@@ -1229,7 +1331,7 @@ var DAPPControllers = class {
 				$scope.plugin = plugin;
 				
 				// ask plugin to prepare what it needs for its form
-				noticeplugin.prepareNoticeModifyForm($scope, $state, $stateParams, notice);
+				noticeplugin.prepareNoticeModifyForm(notice, $scope, $state, $stateParams);
 		    }
 		    
 		}
@@ -1265,7 +1367,7 @@ var DAPPControllers = class {
 		    var notice = noticebookcontract.getNoticeFromKey(noticeindex);
 		    
 		    if (notice) {
-				var type = notice.getType();
+				var type = notice.getLocalNoticeType();
 				
 				var title = $scope.noticetitle.text;
 				var description = $scope.noticedescription.text;
@@ -1279,12 +1381,14 @@ var DAPPControllers = class {
 				notice.setLocalDescription(description);
 				
 				// ask plugin to save what it needs in the notice object
-				noticeplugin.handleNoticeModifyForm($scope, notice);
+				noticeplugin.handleNoticeModifyForm(notice, $scope);
 
 				noticebookcontrollers.savePublicNoticeObject(notice);
 		    	
 		    }
 		}
+		
+		this.getAngularControllers().gotoStatePage('home.noticebooks.notices', {index: contractindex});
 	}
 	
 	prepareNoticeDeployForm($scope, $state, $stateParams) {
@@ -1374,62 +1478,86 @@ var DAPPControllers = class {
 		
 		var noticebookcontract = noticebookcontrollers.getPublicNoticeBookFromKey(contractindex);
 		
-		if ((noticebookcontract) && (!noticebookcontract.isLocalOnly())) {
-			var session = commonmodule.getSessionObject();
-			
-			var owner = noticebookcontract.getLocalOwner();
-			var owningaccount = commonmodule.getAccountObject(owner);
-
-			var payingaccount = commonmodule.getAccountObject(wallet);
-			
-			// unlock account
-			payingaccount.unlock(password, 300); // 300s, but we can relock the account
-			
-			// check that current session impersonates the contract's owner
-			
-			if (!session.isSessionAccount(owningaccount)) {
-				alert("You must be connected with the account of the contract's owner");
-				console.log('owning account is ' + owner + ' session account is ' + session.getSessionUserIdentifier());
-				return;
-			}
-			
-			// get notice
-			var noticeindex = $scope.noticeindex;
-		    var notice = noticebookcontract.getNoticeFromKey(noticeindex);
-		    
-		    if (notice) {
+		if (noticebookcontract) {
+			if (noticebookcontract.isOnChain()) {
+				
 				try {
-					noticebookcontract.publishNotice(payingaccount, gaslimit, gasPrice, notice, function (err, res) {
+					var session = commonmodule.getSessionObject();
+					
+					var ret = noticebookcontract.getChainOwner(function (err, res) {
+						var owner = res;
 						
-						if (!err) {
-							console.log('notice deployed');
-							
-							// save local address
-							noticebookcontrollers.savePublicNoticeObject(notice);
-							
-							app.setMessage("notice has been deployed at " + res);
+						if (!owner) {
+							alert("Could not read contract's owner address");
+							return;
 						}
-						else  {
-							console.log('error deploying notice ' + err);
+						
+						var owningaccount = commonmodule.getAccountObject(owner);
+
+						var payingaccount = commonmodule.getAccountObject(wallet);
+						
+						// unlock account
+						payingaccount.unlock(password, 300); // 300s, but we can relock the account
+						
+						// check that current session impersonates the contract's owner
+						
+						if (!session.isSessionAccount(owningaccount)) {
+							alert("You must be connected with the account of the contract's owner");
+							console.log('owning account is ' + owner + ' session account is ' + session.getSessionUserIdentifier());
+							return;
 						}
-							
+						
+						// get notice
+						var noticeindex = $scope.noticeindex;
+					    var notice = noticebookcontract.getNoticeFromKey(noticeindex);
+					    
+					    if (notice) {
+								noticebookcontract.publishNotice(payingaccount, gaslimit, gasPrice, notice, function (err, res) {
+									
+									if (!err) {
+										console.log('notice deployed');
+										
+										// save local address
+										noticebookcontrollers.savePublicNoticeObject(notice);
+										
+										app.setMessage("notice has been deployed at " + res);
+									}
+									else  {
+										console.log('error deploying notice ' + err);
+									}
+										
+								});
+								
+								app.setMessage("notice deployment created a pending transaction");
+								
+					    	
+					    }
+					    else {
+					    	alert('could not find notice ' + noticeindex);
+					    }
+						
+
+						app.refreshDisplay();										
+					
 					});
 					
-					app.setMessage("notice deployment created a pending transaction");
 					
 				}
 				catch(e) {
 					app.setMessage("Error: " + e);
 				}
-		    	
-		    }
-		    else {
-		    	alert('could not find notice ' + noticeindex);
-		    }
-			
-
-			app.refreshDisplay();
+			}
+			else {
+				alert("Book must already be deployed before publishing notices");
+				return;
+			}
 		}
+		else {
+			alert("Could not find the book with the index " + contractindex);
+			return;
+		}
+		
+		this.getAngularControllers().gotoStatePage('home.noticebooks.notices', {index: contractindex});
 	}
 
 	//

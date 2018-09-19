@@ -47,9 +47,17 @@ var PublicNotice = class {
 		if (this.uuid)
 			return this.uuid;
 		
-		this.uuid = this.session.getUUID();
+		if (this.isLocalOnly())
+			this.setUUID(this.session.getUUID());
 		
 		return this.uuid;
+	}
+	
+	setUUID(uuid) {
+		if (this.uuid)
+			throw 'Error uuid is already set ' + this.uuid;
+		
+		this.uuid = uuid;
 	}
 	
 	isLocalOnly() {
@@ -89,18 +97,18 @@ var PublicNotice = class {
 	}
 	
 	initFromLocalJson(json) {
-		if (json["uuid"])
+		if (json["uuid"])			
 			this.uuid = json["uuid"];
+
 		
 		var status = (json['status'] ? json['status'] : PublicNoticeBook.STATUS_LOCAL);
 		
-		var noticetype = jsonarray[i]['noticetype'];
-		var title = jsonarray[i]['title'];
-		var description = jsonarray[i]['description'];
-		var referenceid = jsonarray[i]['referenceid'];
+		var noticetype = json['noticetype'];
+		var title = json['title'];
+		var description = json['description'];
+		var referenceid = json['referenceid'];
 		
-		var jsoncontent = jsonarray[i]['jsoncontent'];
-		var jsoncontentstring = JSON.stringify(jsoncontent);
+		var jsoncontent = json['jsoncontent'];
 		
 		this.setStatus(status);
 		
@@ -264,7 +272,7 @@ var PublicNotice = class {
 		
 		for (var i = 0; i < jsonarray.length; i++) {
 
-			var publicnotice = module.createBlankPublicNoticebject(session, noticebook);
+			var publicnotice = module.createBlankPublicNoticeObject(session, noticebook);
 			
 			publicnotice.initFromLocalJson(jsonarray[i]);
 			

@@ -24,7 +24,7 @@
     
 		<!-- chain contracts --> 
         <tr ng-repeat="noticebook in chainnoticebooks" class="{{$odd ? 'table-contract-list-tr-chain-odd' : 'table-contract-list-tr-chain-even'}}">
-			<td><a ui-sref="home.noticebooks.modify({index: noticebook.index})">{{noticebook.description}}</a></td>
+			<td><a ui-sref="home.noticebooks.view({index: noticebook.index})">{{noticebook.description}}</a></td>
 			<td>{{noticebook.contracttype}}</td>
 			<td>{{noticebook.statusstring}}</td>
 	        <td>{{ (noticebook.isLocalOnly) ? global.t('local') : noticebook.address}}</td>

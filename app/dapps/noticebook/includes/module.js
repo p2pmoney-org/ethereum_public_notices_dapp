@@ -104,16 +104,71 @@ var Module = class {
 	//
 	// model
 	//
+	
+	// notice book
+	getLocalPublicNoticeBooks(session, bForceRefresh) {
+		var global = this.global;
+		var commonmodule = global.getModuleObject('common');
+		var contracts = commonmodule.getContractsObject(bForceRefresh);
+		
+		var array = [];
+		
+		var locals = contracts.getLocalOnlyContractObjects();
+
+		for (var i = 0; i < locals.length; i++) {
+			var local = locals[i];
+			
+			if (local.getContractType() == 'PublicNoticeBook')
+			array.push(local);
+		}
+
+		return array;
+	}
+	
+	getChainPublicNoticeBooks(session, bForceRefresh) {
+		var global = this.global;
+		var commonmodule = global.getModuleObject('common');
+		
+		var contracts = commonmodule.getContractsObject(bForceRefresh);
+		
+		var array = [];
+		
+		var chains = contracts.getChainContractObjects();
+
+		for (var i = 0; i < chains.length; i++) {
+			var chain = chains[i];
+			
+			if (chain.getContractType() == 'PublicNoticeBook')
+			array.push(chain);
+		}
+
+		return array;
+	}
+	
+	findChainPublicNoticeBook(noticebookarray, address) {
+		if (!address)
+			return;
+		
+		var addr = address.trim().toLowerCase();
+		
+		for (var i = 0; i < noticebookarray.length; i++) {
+			var bookaddress = noticebookarray[i].getAddress().trim().toLowerCase();
+			if (bookaddress == addr)
+				return noticebookarray[i];
+		}
+	}
+	
+	
+	// public notice
 	createBlankPublicNoticeObject(session, publicnoticebook) {
 		var publicnotice = new this.PublicNotice(session, publicnoticebook);
 		
 		return publicnotice;
 	}
 	
-	getPublicNoticesFromJsonArray(session, jsonarray) {
-		return this.PublicNotice.getPublicNoticesFromJsonArray(this, session, jsonarray)
+	getPublicNoticesFromJsonArray(session, publicnoticebook, jsonarray) {
+		return this.PublicNotice.getPublicNoticesFromJsonArray(this, session, publicnoticebook, jsonarray)
 	}
-	
 	
 }
 

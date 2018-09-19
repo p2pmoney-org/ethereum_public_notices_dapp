@@ -17,14 +17,15 @@ var Plugin = class {
 	}
 	
 	getCreateFormPath() {
-		return "./dapps/noticebook/plugins/angular-ui/partials/notice-create-form.html";
+		return "./dapps/noticebook/plugins/angular-ui/partials/notice-simple-create-form.html";
 	}
 	
 	prepareNoticeCreateForm($scope, $state, $stateParams) {
+		$scope.noticetype = 'simple';
 		$scope.noticecontent = {text: 'SIMPLE'};
 	}
 	
-	handleNoticeCreateForm($scope, notice) {
+	handleNoticeCreateForm(notice, $scope) {
 		var content = $scope.noticecontent.text;
 		
 		var jsoncontent = {};
@@ -36,17 +37,20 @@ var Plugin = class {
 	
 	// modify
 	getModifyFormPath() {
-		return "./dapps/noticebook/plugins/angular-ui/partials/notice-modify-form.html";
+		return "./dapps/noticebook/plugins/angular-ui/partials/notice-simple-modify-form.html";
 	}
 	
-	prepareNoticeModifyForm($scope, $state, $stateParams, notice) {
+	prepareNoticeModifyForm(notice, $scope, $state, $stateParams) {
+		if (!notice.isLocalOnly())
+			return;
+		
 		var jsoncontent = notice.getLocalJsonContent();
     	var content = jsoncontent.plaintext;
   	
     	$scope.noticecontent = { text: content};
 	}
 	
-	handleNoticeModifyForm($scope, notice) {
+	handleNoticeModifyForm(notice, $scope) {
 		var content = $scope.noticecontent.text;
 		
 		var jsoncontent = {};
@@ -59,12 +63,17 @@ var Plugin = class {
 	// view
 	getViewPath() {
 		// compulsory function
-		return "./dapps/noticebook/plugins/angular-ui/partials/notice-view.html";
+		return "./dapps/noticebook/plugins/angular-ui/partials/notice-simple-view.html";
 	}
 	
-	prepareNoticeView($scope, $state, $stateParams, notice) {
+	prepareNoticeView(notice, $scope, $state, $stateParams, $sce) {
 		// compulsory function
-		
+		var jsoncontent = (notice.isLocalOnly() ? notice.getLocalJsonContent() : notice.getChainJsonContent());
+    	var content = jsoncontent.plaintext;
+    	
+    	console.log('jsoncontent.plaintext is ' + jsoncontent.plaintext);
+  	
+    	$scope.noticecontent = { text: content};
 	}
 	
 }

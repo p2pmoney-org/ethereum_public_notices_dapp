@@ -99,6 +99,8 @@ var PublicNoticeBook = class {
 	initContract(json) {
 		console.log('PublicNoticeBook.initContract called for ' + this.address);
 		
+		//console.log('json is ' + JSON.stringify(json));
+		
 		var global = GlobalClass.getGlobalObject();
 		var noticebookmodule = global.getModuleObject('noticebook');
 		
@@ -129,12 +131,13 @@ var PublicNoticeBook = class {
 		if (json['notices']) {
 			console.log('reading array of ' + json['notices'].length + ' notices');
 			
-			var localnoticearray = noticebookmodule.getPublicNoticesFromJsonArray(this.session, json['notices']);
+			var localnoticearray = noticebookmodule.getPublicNoticesFromJsonArray(this.session, this, json['notices']);
 			
 			for (var i = 0; i < localnoticearray.length; i++) {
 				this.addLocalNotice(localnoticearray[i]);
 			}
 		}
+		
 	}
 	
 	getLocalJson() {
@@ -157,7 +160,7 @@ var PublicNoticeBook = class {
 				creationdate: creationdate, submissiondate: submissiondate,
 				description: description,  booktitle: booktitle,  owner: owner};
 		
-		// issuance list
+		// notice list
 		if (this.localnoticearray) {
 			var jsonarray = []
 
@@ -170,7 +173,7 @@ var PublicNoticeBook = class {
 				}
 			}
 			
-			//console.log('returning ' + jsonarray.length + ' local issuances');
+			//console.log('returning ' + jsonarray.length + ' local notices');
 			json['notices'] = jsonarray;
 		}
 
@@ -178,6 +181,8 @@ var PublicNoticeBook = class {
 	}
 	
 	saveLocalJson() {
+		console.log('PublicNoticeBook.saveLocalJson called for ' + this.address);
+
 		var persistor = this.getContractLocalPersistor();
 		
 		persistor.savePublicNoticeBookJson(this);
@@ -191,6 +196,8 @@ var PublicNoticeBook = class {
 	getNoticeFromKey(key) {
 		var notc;
 		var i;
+		
+		console.log('getNoticeFromKey called for key ' + key);
 		
 		// local first
 		for (i = 0; i < this.localnoticearray.length; i++) {
@@ -207,6 +214,8 @@ var PublicNoticeBook = class {
 			if ((notc) && (notc.getNoticeIndex() == key))
 				return notc;
 		}
+		
+		console.log('getNoticeFromKey did not found any notice with key ' + key);
 	}
 	
 	removeNoticeObject(notice) {
@@ -239,7 +248,16 @@ var PublicNoticeBook = class {
 	}
 	
 	getLocalNotices() {
-		return this.localnoticearray;
+		var array = [];
+		
+		for (var i = 0; i < this.localnoticearray.length; i++) {
+			var notice = this.localnoticearray[i];
+			
+			if (notice.getStatus() != PublicNoticeBook.STATUS_ON_CHAIN)
+			array.push(notice);
+		}
+		
+		return array;
 	}
 	
 	addLocalNotice(notice) {
@@ -277,8 +295,10 @@ var PublicNoticeBook = class {
 				var referenceid = notc.getLocalReferenceID();
 				var chainnotice = this.getChainNoticeFromReferenceID(referenceid);
 				
-				if (chainnotice)
+				if (chainnotice)  {
+					notc.setStatus(PublicNoticeBook.STATUS_ON_CHAIN);
 					noticestoremove.push(notc);
+				}
 			}
 		}
 		
@@ -287,7 +307,9 @@ var PublicNoticeBook = class {
 			for (i = 0; i < noticestoremove.length; i++) {
 				notc = noticestoremove[i];
 				
-				this.removeNoticeObject(notc);
+				// we no longer remove
+				console.log('WARNING checkPendingNotices called with remove flag, but removing is obsolete');
+				//this.removeNoticeObject(notc);
 			}
 		}
 		
@@ -295,11 +317,22 @@ var PublicNoticeBook = class {
 	}
 	
 	getChainNotices() {
-		return this.chainnoticearray;
+		var array = [];
+		
+		for (var i = 0; i < this.chainnoticearray.length; i++) {
+			var notice = this.chainnoticearray[i];
+			
+			array.push(notice);
+		}
+
+		return array;
 	}
 	
 	addChainNoticeAt(notice, index) {
 		this.chainnoticearray[index] = notice;
+		
+		var key = "key" + Math.floor((Math.random() * 1000) + 1) + "-index" + index;
+		notice.setNoticeIndex(key);
 	}
 	
 	getChainNoticeFromReferenceID(referenceid) {
@@ -498,7 +531,7 @@ var PublicNoticeBook = class {
 		
 		var promise = contractinterface.deploy(contractowner, booktitle, payingaccount, owningaccount, gas, gasPrice)
 		.then(function(res) {
-			console.log('PublicNoticeBook.deploy promise of deployment should be resolved');
+			console.log('PublicNoticeBook.deploy promise of deployment should be resolved, result is: ' + res);
 			
 			self.setStatus(PublicNoticeBook.STATUS_PENDING);
 			self.setAddress(contractinterface.getAddress());
@@ -532,19 +565,21 @@ var PublicNoticeBook = class {
 		
 		var contractinterface = this.getContractInterface();
 		
-		var noticetype = null;
+		var noticetype = publicnotice.getLocalNoticeType();
 		var title = publicnotice.getLocalTitle();
-		var jsoncontent = publicnotice.getLocalJsonContent;
+		var jsoncontent = publicnotice.getLocalJsonContent();
 		var jsoncontentstring = JSON.stringify(jsoncontent);
 		
 		var referenceID = session.guid();
 		publicnotice.setLocalReferenceID(referenceID);
+		publicnotice.saveLocalJson();
 		
 		var promise = contractinterface.publishNotice(noticetype, title, jsoncontentstring, referenceID, payingaccount, gas, gasPrice)
 		.then(function(res) {
-			console.log('PublicNoticeBook.publishNotice promise of registration should be resolved');
+			console.log('PublicNoticeBook.publishNotice promise of registration should be resolved, result is: ' + res);
 			
 			publicnotice.setStatus(PublicNoticeBook.STATUS_PENDING);
+			publicnotice.saveLocalJson();
 			
 			if (callback)
 				callback(null, res);
@@ -638,15 +673,19 @@ var PublicNoticeBook = class {
 			
 			var notice_type = res['notice_type'];
 			var title = res['title'];
-			var json_content = res['json_content'];
+			var json_content_string = res['json_content'];
+			var json_content = JSON.parse(json_content_string);
 			var referenceID = res['referenceID'];
 			
 			publicnotice.setStatus(PublicNoticeBook.STATUS_ON_CHAIN);
 			
+			publicnotice.setChainReferenceID(referenceID);
+
+			publicnotice.setUUID(referenceID); // use this uuid saved in the chain
+			
 			publicnotice.setChainNoticeType(notice_type);
 			publicnotice.setChainTitle(title);
 			publicnotice.setChainJsonContent(json_content);
-			publicnotice.setChainReferenceID(referenceID);
 			
 			publicnotice.setChainPosition(index);
 			
