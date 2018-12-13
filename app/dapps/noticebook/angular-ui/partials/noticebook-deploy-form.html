@@ -1,8 +1,7 @@
 
 <form name="noticebookdeployForm" ng-controller="NoticeBookDeployFormCtrl" ng-submit="handleSubmit()">
  
- 	<input type="hidden" name="index" ng-model="noticebookindex" required>
- 	<input type="hidden" name="number" ng-model="noticeindex" required>
+ 	<input type="hidden" name="index" ng-model="noticebook.index" required>
  	
  	<div>
 	
@@ -16,7 +15,7 @@
 
 	<span>
 		<label for="password">{{'Password:' | transl}}</label>
-		<input type="password" name="password" ng-model="password.text" required>
+		<input type="password" name="password" ng-model="password.text">
  	</span>
  	
 	<span>

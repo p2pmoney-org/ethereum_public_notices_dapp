@@ -43,8 +43,7 @@ var Module = class {
 		
 		var moduleroot = './dapps';
 
-		//noticebook
-		//modulescriptloader.push_script( moduleroot + '/noticebook/module.js');
+		// no file loaded
 
 		
 		modulescriptloader.load_scripts(function() { self.init(); if (callback) callback(null, self); });

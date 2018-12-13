@@ -464,6 +464,7 @@ var PublicNoticeBook = class {
 	setLocalDescription(description) {
 		this.local_description = description;
 	}
+	
 	getLocalOwner() {
 		return this.local_owner;
 	}
@@ -529,15 +530,19 @@ var PublicNoticeBook = class {
 		var contractowner = this.getLocalOwner();
 		var booktitle = this.getLocalBookTitle();
 		
-		var promise = contractinterface.deploy(contractowner, booktitle, payingaccount, owningaccount, gas, gasPrice)
+		var transactionuuid = this.getUUID();
+		
+		var promise = contractinterface.deploy(contractowner, booktitle, payingaccount, owningaccount, gas, gasPrice, transactionuuid)
 		.then(function(res) {
-			console.log('PublicNoticeBook.deploy promise of deployment should be resolved, result is: ' + res);
+			console.log('PublicNoticeBook.deploy promise of deployment resolved, result is: ' + res);
 			
 			self.setStatus(PublicNoticeBook.STATUS_PENDING);
 			self.setAddress(contractinterface.getAddress());
 			
 			if (callback)
 				callback(null, res);
+			
+			return res;
 			
 		});
 		
@@ -570,7 +575,7 @@ var PublicNoticeBook = class {
 		var jsoncontent = publicnotice.getLocalJsonContent();
 		var jsoncontentstring = JSON.stringify(jsoncontent);
 		
-		var referenceID = session.guid();
+		var referenceID = (this.getUUID() !== null ? this.getUUID() : session.guid());
 		publicnotice.setLocalReferenceID(referenceID);
 		publicnotice.saveLocalJson();
 		
@@ -671,30 +676,38 @@ var PublicNoticeBook = class {
 		.then(function(res) {
 			console.log('PublicNoticeBook.getChainNoticeAt received ' + res);
 			
-			var notice_type = res['notice_type'];
-			var title = res['title'];
-			var json_content_string = res['json_content'];
-			var json_content = JSON.parse(json_content_string);
-			var referenceID = res['referenceID'];
-			
-			publicnotice.setStatus(PublicNoticeBook.STATUS_ON_CHAIN);
-			
-			publicnotice.setChainReferenceID(referenceID);
+			if (res) {
+				var notice_type = res['notice_type'];
+				var title = res['title'];
+				var json_content_string = res['json_content'];
+				var json_content = JSON.parse(json_content_string);
+				var referenceID = res['referenceID'];
+				
+				publicnotice.setStatus(PublicNoticeBook.STATUS_ON_CHAIN);
+				
+				publicnotice.setChainReferenceID(referenceID);
 
-			publicnotice.setUUID(referenceID); // use this uuid saved in the chain
+				publicnotice.setUUID(referenceID); // use this uuid saved in the chain
+				
+				publicnotice.setChainNoticeType(notice_type);
+				publicnotice.setChainTitle(title);
+				publicnotice.setChainJsonContent(json_content);
+				
+				publicnotice.setChainPosition(index);
+				
+				self.addChainNoticeAt(publicnotice, index);
+				
+				if (callback)
+					callback(null, publicnotice);
+				
+				return res;
+			}
+			else {
+				
+				if (callback)
+					callback('error retrieving notice at ' + index, null);
+			}
 			
-			publicnotice.setChainNoticeType(notice_type);
-			publicnotice.setChainTitle(title);
-			publicnotice.setChainJsonContent(json_content);
-			
-			publicnotice.setChainPosition(index);
-			
-			self.addChainNoticeAt(publicnotice, index);
-			
-			if (callback)
-				callback(null, publicnotice);
-			
-			return res;
 		});
 		
 		return promise;

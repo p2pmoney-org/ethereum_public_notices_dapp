@@ -275,7 +275,7 @@ var DAPPControllers = class {
 	
 	// templates elements
 	
-	_getNoticeBookArray($scope, views, contract) {
+	_getViewNoticeBookArray($scope, views, contract) {
 		var global = this.global;
 		
 		var noticebook = [];
@@ -340,10 +340,31 @@ var DAPPControllers = class {
 		return noticebook;
 	}
 	
+	_getViewNoticeBooksArray($scope, views, modelnoticebookarray) {
+		var viewnoticebooks = [];
+		
+		if (modelnoticebookarray) {
+			for (var i = 0; i < modelnoticebookarray.length; i++) {
+				var contract = modelnoticebookarray[i];
+				
+				if (contract) {
+					var viewnoticebook = this._getViewNoticeBookArray($scope, views, contract);
+					
+					viewnoticebooks.push(viewnoticebook);
+				}
+			}
+		}
+		
+		return viewnoticebooks;
+	}
+	
 	prepareNoticeBooksView($scope) {
 		console.log("Controllers.prepareNoticeBooksView called");
 		
 		var global = this.global;
+		var self = this;
+		var app = global.getAppObject();
+
 		var commonmodule = global.getModuleObject('common');
 		var session = commonmodule.getSessionObject();
 		
@@ -351,48 +372,62 @@ var DAPPControllers = class {
 		var views = this.noticebookviews;
 		
 		// local contracts
+		// (in memory)
 		var localnoticebooks = [];
 		
-		//var contracts = commonmodule.getContractsObject(true);
-		//var localnoticebookarray = contracts.getLocalOnlyContractObjects();
-		
 		var noticebookmodule = global.getModuleObject('noticebook');
-		var localnoticebookarray = noticebookmodule.getLocalPublicNoticeBooks(session, true);
+		var localnoticebookarray = noticebookmodule.getLocalPublicNoticeBooks(session, true, function(err, res) {
+			
+			// list of contracts has been refreshed
+			
+			// update local and chain lists
+			$scope.localnoticebooks = self._getViewNoticeBooksArray($scope, views, noticebookmodule.getLocalPublicNoticeBooks(session, false));
+			
+			$scope.chainnoticebooks = self._getViewNoticeBooksArray($scope, views, noticebookmodule.getChainPublicNoticeBooks(session, false));
+		
+			// putting $apply in a deferred call to avoid determining if callback is called
+			// from a promise or direct continuation of the code
+			setTimeout(function() {
+			    $scope.$apply();
+			  }, 100);
+		});
 		
 		if (localnoticebookarray) {
-			for (var i = 0; i < localnoticebookarray.length; i++) {
-				var contract = localnoticebookarray[i];
-				
-				if (contract) {
-					var noticebook = this._getNoticeBookArray($scope, views, contract);
-					
-					localnoticebooks.push(noticebook);
-				}
-			}
+			localnoticebooks = this._getViewNoticeBooksArray($scope, views, localnoticebookarray);
 		}
 		
 		$scope.localnoticebooks = localnoticebooks;
-		
 
 		// chain contracts
+		// (in memory)
 		var chainnoticebooks = [];
 		
 		//var chainnoticebookarray = contracts.getChainContractObjects();
 		var chainnoticebookarray = noticebookmodule.getChainPublicNoticeBooks(session, false);
 		
 		if (chainnoticebookarray) {
-			for (var i = 0; i < chainnoticebookarray.length; i++) {
-				var contract = chainnoticebookarray[i];
-				
-				if (contract) {
-					var noticebook = this._getNoticeBookArray($scope, views, contract);
-					
-					chainnoticebooks.push(noticebook);
-				}
-			}
+			chainnoticebooks = this._getViewNoticeBooksArray($scope, views, chainnoticebookarray)
 		}
 		
 		$scope.chainnoticebooks = chainnoticebooks;
+		
+		// refresh list to update both parts
+		noticebookmodule.getPublicNoticeBooks(session, true, function(err, res) {
+			
+			// list of contracts has been refreshed
+			
+			// update local and chain lists
+			$scope.localnoticebooks = self._getViewNoticeBooksArray($scope, views, noticebookmodule.getLocalPublicNoticeBooks(session, false));
+			
+			$scope.chainnoticebooks = self._getViewNoticeBooksArray($scope, views, noticebookmodule.getChainPublicNoticeBooks(session, false));
+		
+			// putting $apply in a deferred call to avoid determining if callback is called
+			// from a promise or direct continuation of the code
+			setTimeout(function() {
+			    $scope.$apply();
+			  }, 100);
+		});
+
 	}
 	
 	prepareNoticeBookView($scope, $state, $stateParams) {
@@ -876,6 +911,9 @@ var DAPPControllers = class {
 	// Forms
 	//
 	
+	//
+	// notice books
+	
 	// notice book creation
 	prepareNoticeBookCreateForm($scope) {
 		console.log("Controllers.prepareNoticeBookCreateForm called");
@@ -919,7 +957,7 @@ var DAPPControllers = class {
 		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 	
-	// notice import
+	// notice book import
 	prepareNoticeBookImportForm($scope) {
 		console.log("Controllers.prepareNoticeBookImportForm called");
 
@@ -991,7 +1029,7 @@ var DAPPControllers = class {
 		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 
-	// notice modification
+	// notice book modification
 	prepareNoticeBookModifyForm($scope, $state, $stateParams) {
 		console.log("Controllers.prepareNoticeModifyForm called");
 		
@@ -1065,7 +1103,7 @@ var DAPPControllers = class {
 		this.getAngularControllers().gotoStatePage('home.noticebooks');
 	}
 	
-	// notice modification
+	// notice book deployment
 	prepareNoticeBookDeployForm($scope, $state, $stateParams) {
 		console.log("Controllers.prepareNoticeBookDeployForm called");
 		
@@ -1193,7 +1231,9 @@ var DAPPControllers = class {
 		}
 	}
 		
+	//
 	// notices
+
 	prepareNoticeCreateForm($scope, $state, $stateParams) {
 		console.log("Controllers.prepareNoticeCreateForm called");
 		

@@ -50,13 +50,14 @@ var PublicNoticeBookContractInterface = class {
 	
 
 	deploy(contractowner, booktitle,
-			payingaccount, owningaccount, gas, gasPrice, callback) {
+			payingaccount, owningaccount, gas, gasPrice, 
+			transactionuuid, callback) {
 		var self = this;
 		var session = this.session;
 
 		var fromaddress = payingaccount.getAddress();
 		
-		console.log('PublicNoticeBookContractInterface.deploy called for ' + booktitle + " from " + fromaddress + " with gas limit " + gas + " and gasPrice " + gasPrice);
+		console.log('PublicNoticeBookContractInterface.deploy called for ' + booktitle + " from " + fromaddress + " with gas limit " + gas + " and gasPrice " + gasPrice + " and transactionuuid " + transactionuuid);
 		
 		
 		// we validate the transaction
@@ -65,14 +66,20 @@ var PublicNoticeBookContractInterface = class {
 		
 		var contractinstance = this.getContractInstance();
 		
-		var params = [];
+		var contracttransaction = contractinstance.getContractTransactionObject(payingaccount, gas, gasPrice);
 		
-		params.push(contractowner);
-		params.push(booktitle);
+		var args = [];
 		
-		var promise = contractinstance.contract_new(params, payingaccount, gas, gasPrice)
+		args.push(contractowner);
+		args.push(booktitle);
+		
+		contracttransaction.setArguments(args);
+		
+		contracttransaction.setContractTransactionUUID(transactionuuid);
+
+		var promise = contractinstance.contract_new_send(contracttransaction)
 		.then(function(res) {
-			console.log('PublicNoticeBookContractInterface.deploy promise of deployment should be resolved');
+			console.log('PublicNoticeBookContractInterface.deploy promise of deployment, result is: ' + res);
 			
 			self.setAddress(contractinstance.getAddress());
 			
@@ -152,22 +159,26 @@ var PublicNoticeBookContractInterface = class {
 		
 		var fromaddress = payingaccount.getAddress();
 		
-		console.log('PublicNoticeBookContractInterface.publishNotice called from ' + fromaddress + ' with gas limit ' + gas + ' and gasPrice ' + gasPrice);
+		console.log('PublicNoticeBookContractInterface.publishNotice called from ' + fromaddress + ' with gas limit ' + gas + ' and gasPrice ' + gasPrice + ' with referenceID ' + referenceID);
 
 		var contractinstance = this.getContractInstance();
 
-		var params = [];
+		var contracttransaction = contractinstance.getContractTransactionObject(payingaccount, gas, gasPrice);
 		
-		params.push((notice_type ? notice_type : 'simple'));
-		params.push((title ? title : ''));
-		params.push((json_content ? json_content : '{}'));
-		params.push((referenceID ? referenceID : ''));
+		var args = [];
 		
-		var value = null;
-		var txdata = null;
-		var nonce = null;
+		args.push((notice_type ? notice_type : 'simple'));
+		args.push((title ? title : ''));
+		args.push((json_content ? json_content : '{}'));
+		args.push((referenceID ? referenceID : ''));
 		
-		var promise = contractinstance.method_sendTransaction('publishNotice', params, payingaccount, value, gas, gasPrice, txdata, nonce, callback)
+		contracttransaction.setArguments(args);
+		
+		contracttransaction.setContractTransactionUUID(referenceID);
+
+		contracttransaction.setMethodName('publishNotice');
+		
+		var promise = contractinstance.method_send(contracttransaction, callback)
 		.then(function(res) {
 			console.log('PublicNoticeBookContractInterface.publishNotice promise of publish should be resolved');
 			
@@ -207,16 +218,23 @@ var PublicNoticeBookContractInterface = class {
 		.then(function(res) {
 			console.log('PublicNoticeBookContractInterface.getNoticeAt received ' + res);
 			
-			var ret = [];
-			ret['notice_type'] = res[0];
-			ret['title'] = res[1];
-			ret['json_content'] = res[2];
-			ret['referenceID'] = res[3];
+			if (res) {
+				var ret = [];
+				ret['notice_type'] = res[0];
+				ret['title'] = res[1];
+				ret['json_content'] = res[2];
+				ret['referenceID'] = res[3];
 
-			if (callback)
-				callback(null, ret);
+				if (callback)
+					callback(null, ret);
+				
+				return ret;
+			}
+			else {
+				if (callback)
+					callback('error retrieving notice at ' + i, null);
+			}
 			
-			return ret;
 		});
 		
 		return promise

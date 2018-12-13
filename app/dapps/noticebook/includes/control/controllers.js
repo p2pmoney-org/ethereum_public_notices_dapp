@@ -8,7 +8,7 @@ var ModuleControllers = class {
 	
 	// notice books
 	createPublicNoticeBookObject(data) {
-		console.log("Controllers.createPublicNoticeContract called");
+		console.log("Controllers.createPublicNoticeBookObject called");
 		
 		var address = (data && data['address'] ? data['address'] : null);
 		var owner = (data && data['owner'] ? data['owner'] : null);
@@ -47,8 +47,9 @@ var ModuleControllers = class {
 		var contracts = session.getContractsObject();
 		
 		var contractindex = contract.getContractIndex();
+		var contractuuid = contract.getUUID();
 		
-		if (!contracts.getContractObjectFromKey(contractindex)) {
+		if (!contracts.getContractObjectFromUUID(contractuuid)) {
 			// insert
 			contracts.addContractObject(contract);
 			

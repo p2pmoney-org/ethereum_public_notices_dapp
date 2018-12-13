@@ -29,7 +29,7 @@ class Views {
 			+ "</a>";
 
 		var content = loginlink;
-		console.log('loginlink text is: ' + loginlink);
+		//console.log('loginlink text is: ' + loginlink);
 		
 		return content;
 	}

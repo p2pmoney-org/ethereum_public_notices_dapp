@@ -64,7 +64,50 @@ var Module = class {
 		return this.isloading;
 	}
 
-	// optional  module functions
+	// optional module functions
+	registerHooks() {
+		console.log('module registerHooks called for ' + this.name);
+		
+		var global = this.global;
+		
+		global.registerHook('creatingSession_hook', 'mvc', this.creatingSession_hook);
+	}
+	
+	//
+	// hooks
+	//
+	creatingSession_hook(result, params) {
+		console.log('creatingSession_hook called for ' + this.name);
+		
+		var global = this.global;
+
+		var session = params[0];
+
+		// check url parameters
+		var getUrlVars = function() {
+		    var vars = {};
+		    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+		        vars[key] = value;
+		    });
+		    return vars;
+		};
+		
+		var params = getUrlVars();
+		
+		if (params && params['sessionuuid']) {
+			var sessionuuid = params['sessionuuid'];
+			
+			console.log('app bootstrapped with sessionuuid ' + sessionuuid);
+			
+			session.setSessionUUID(sessionuuid);
+			
+		}
+
+		result.push({module: 'mvc', handled: true});
+		
+		return true;
+	}
+	
 	
 	// objects
 	getControllersObject() {

@@ -4,12 +4,19 @@ class Controllers {
 	
 	constructor(global) {
 		this.global = global;
+		this.app = null; // filled in registerControllers
 		
 		var dappsmodule = global.getModuleObject('dapps');
 		this.dappscontrollers = (dappsmodule ? dappsmodule.getAngularControllers() : null);
 	}
 	
+	getAppObject() {
+		return this.app;
+	}
+	
 	registerControllers(app) {
+		this.app = app;
+		
 		var global = this.global;
 		
 		var angular_app = app.getAngularApp();
@@ -57,6 +64,22 @@ class Controllers {
 		}]);
 
 		
+		angular_app.controller("CryptoKeysViewCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+			controllers.prepareCryptoKeysView($scope, $state, $stateParams);
+		}]);
+		
+		angular_app.controller("EthAccountsViewCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+			controllers.prepareEthAccountsView($scope, $state, $stateParams);
+		}]);
+		
+		angular_app.controller("TransactionHistoryViewCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+			controllers.prepareTransactionHistoryView($scope, $state, $stateParams);
+		}]);
+		
+		angular_app.controller("EthAccountViewCtrl",  ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+			controllers.prepareEthAccountView($scope, $state, $stateParams);
+		}]);
+		
 		
 		//
 		// Controllers for forms
@@ -71,6 +94,19 @@ class Controllers {
 		}]);
 		
 		
+		angular_app.controller("ethAccountFormCtrl", ['$scope', function ($scope) {
+			controllers.prepareEthAccountForm($scope);
+		}]);
+		
+		angular_app.controller("ethAccountModifyFormCtrl", ['$scope', '$state', '$stateParams', function ($scope, $state, $stateParams) {
+			controllers.prepareEthAccountModifyForm($scope, $state, $stateParams);
+		}]);
+		
+		angular_app.controller("EtherTransferFormCtrl", ['$scope', function ($scope) {
+			controllers.prepareEtherTransferForm($scope);
+		}]);
+		
+
 		//
 		// Handlers for requests (clicks, forms,..)
 		//
@@ -136,6 +172,16 @@ class Controllers {
 	        ncyBreadcrumb: { label: global.t('About') }})
 	    .state('home.account', {url: '/account', views: {'main@': {templateUrl: './angular-ui/templates/account.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Account') }})
+	    .state('home.account.eth-accounts', {url: '/account/eth-accounts', views: {'main@': {templateUrl: './angular-ui/templates/eth-accounts.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Ethereum Accounts') }})
+	    .state('home.account.eth-accounts.view', {url: '/account/eth-accounts/view/:uuid', views: {'main@': {templateUrl: './angular-ui/templates/eth-account.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('View') }})
+	    .state('home.account.cryptokeys', {url: '/account/cryptokeys', views: {'main@': {templateUrl: './angular-ui/templates/cryptokeys.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Crypto Keys') }})
+	    .state('home.account.transfer', {url: '/account/transfer', views: {'main@': {templateUrl: './angular-ui/templates/ether-transfer.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Transfer') }})
+	    .state('home.account.transaction-history', {url: '/account/txhistory', views: {'main@': {templateUrl: './angular-ui/templates/transaction-history.html', controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Tx History') }})
 	    .state('home.login', {url: '/login', views: {'main@': {templateUrl: './angular-ui/templates/login.html', controller: "PageRequestHandler",}},
 	        ncyBreadcrumb: { label: global.t('Login') }})
 	    .state('home.logout', {url: '/logout', views: {'main@': {templateUrl: './angular-ui/templates/logout.html', controller: "PageRequestHandler",}},
@@ -151,15 +197,32 @@ class Controllers {
 	// Commands
 	//
 	
+	// for any type of controller (angular or other)
+	translate(string) {
+		// 'this' is not defined
+		var global = GlobalClass.getGlobalObject();
+		
+		return global.t(string);
+	}
+	
 	gotoHome() {
 		this.gotoStatePage('home');
 	}
 	
+	gotoLoginPage() {
+		this.gotoStatePage('home.login');
+	}
+	
+	refreshPage() {
+		this.getAppObject().refreshDisplay();
+	}
+	
+	// specific to angular
 	gotoStatePage(pagestate, params) {
 		console.log("Controllers.gotoStatePage called for: " + pagestate);
 
 		var global = this.global;
-		var app = global.getAppObject();
+		var app = this.getAppObject();
 		var angular_app = app.getAngularApp();
 		
 		var gonow = function () {
@@ -175,13 +238,6 @@ class Controllers {
 		};
 		
 		gonow();
-	}
-	
-	translate(string) {
-		// 'this' is not defined
-		var global = GlobalClass.getGlobalObject();
-		
-		return global.t(string);
 	}
 	
 	//
@@ -292,7 +348,7 @@ class Controllers {
 	}
 	
 	prepareAccountView($scope) {
-		console.log("Controllers.prepareHomeView called");
+		console.log("Controllers.prepareAccountView called");
 		
 		var global = this.global;
 		var commonmodule = global.getModuleObject('common');
@@ -309,6 +365,230 @@ class Controllers {
 			$scope.useruuid = user.getUserUUID();
 		}
 		
+	}
+	
+	prepareCryptoKeysView($scope, $state, $stateParams) {
+		console.log("Controllers.prepareCryptoKeysView called");
+		
+		var global = this.global;
+		var commonmodule = global.getModuleObject('common');
+		var session = commonmodule.getSessionObject();
+		
+		
+		var cryptokeys = [];
+		
+		var cryptokeyarray = session.getSessionCryptoKeyObjects(true, function(err, keyarray) {
+			if (keyarray) {
+				// empty array
+				while(cryptokeys.length > 0) { cryptokeys.pop();}
+				
+				for (var i = 0; i < keyarray.length; i++) {
+					var cryptokeyobj = keyarray[i];
+					
+					if (cryptokeyobj) {
+						var cryptokey = [];
+						
+						cryptokey['uuid'] = cryptokeyobj.getKeyUUID();
+
+						cryptokey['description'] = cryptokeyobj.getDescription();
+						cryptokey['address'] = cryptokeyobj.getAddress();
+						cryptokey['public_key'] = cryptokeyobj.getPublicKey();
+						
+						cryptokeys.push(cryptokey);
+					}
+				}
+			}
+			
+			// putting $apply in a deferred call to avoid determining if callback is called
+			// from a promise or direct continuation of the code
+			setTimeout(function() {
+			    $scope.$apply();
+			  }, 100);
+		});
+		
+		if (cryptokeyarray) {
+			for (var i = 0; i < cryptokeyarray.length; i++) {
+				var cryptokeyobj = cryptokeyarray[i];
+				
+				if (cryptokeyobj) {
+					var cryptokey = [];
+					
+					cryptokey['uuid'] = cryptokeyobj.getKeyUUID();
+
+					cryptokey['description'] = cryptokeyobj.getDescription();
+					cryptokey['address'] = cryptokeyobj.getAddress();
+					cryptokey['public_key'] = cryptokeyobj.getPublicKey();
+					
+					cryptokeys.push(cryptokey);
+				}
+			}
+		}
+		
+		$scope.cryptokeys = cryptokeys;
+	}
+	
+	prepareEthAccountsView($scope, $state, $stateParams) {
+		console.log("Controllers.prepareEthAccountsView called");
+		
+		var global = this.global;
+
+		var commonmodule = global.getModuleObject('common');
+		var commoncontrollers = commonmodule.getControllersObject();
+
+		var session = commonmodule.getSessionObject();
+		
+		
+		var ethaccounts = [];
+		
+		// get list of all accounts (third party and personal)
+		var accountarray = session.getAccountObjects(true, function(err, accntarray) {
+			// empty array
+			while(ethaccounts.length > 0) { ethaccounts.pop();}
+
+			if (accntarray) {
+				for (var i = 0; i < accntarray.length; i++) {
+					var account = accntarray[i];
+					
+					if (account) {
+						var ethaccount = [];
+						
+						ethaccount['uuid'] = account.getAccountUUID();
+
+						ethaccount['description'] = (account.getDescription() !== null ? account.getDescription() : account.getAddress());
+						ethaccount['type'] = (account.getPrivateKey() !== null ? global.t('personal') : global.t('3rd party'));
+						ethaccount['address'] = account.getAddress();
+						ethaccount['public_key'] = account.getPublicKey();
+						ethaccount['rsa_public_key'] = account.getRsaPublicKey();
+
+						ethaccount['balance'] = global.t('loading');
+						
+						// write ether balance for this account
+						var writebalance = function(ethaccount, account) {
+							account.getChainBalance(function(err, res) {
+								if (err) {
+									ethaccount['balance'] = global.t('error');
+								}
+								else {
+									var etherbalance = commoncontrollers.getEtherStringFromWei(res);
+									ethaccount['balance'] = etherbalance + ' ETH';
+								}
+								
+								// tell scope a value has changed
+								$scope.$apply();
+							});
+						};
+						
+						writebalance(ethaccount, account);
+
+						ethaccounts.push(ethaccount);
+					}
+				}
+			}
+			
+			
+			// putting $apply in a deferred call to avoid determining if callback is called
+			// from a promise or direct continuation of the code
+			setTimeout(function() {
+			    $scope.$apply();
+			  }, 100);
+		});
+		
+		if (accountarray) {
+			for (var i = 0; i < accountarray.length; i++) {
+				var account = accountarray[i];
+				
+				if (account) {
+					var ethaccount = [];
+					
+					ethaccount['uuid'] = account.getAccountUUID();
+
+					ethaccount['description'] = (account.getDescription() !== null ? account.getDescription() : account.getAddress());
+					ethaccount['type'] = (account.getPrivateKey() !== null ? global.t('personal') : global.t('3rd party'));
+					ethaccount['address'] = account.getAddress();
+					ethaccount['public_key'] = account.getPublicKey();
+					ethaccount['rsa_public_key'] = account.getRsaPublicKey();
+					
+					ethaccounts.push(ethaccount);
+				}
+			}
+		}
+		
+		$scope.ethaccounts = ethaccounts;
+	}
+	
+	prepareEthAccountView($scope, $state, $stateParams) {
+		console.log("Controllers.prepareEthAccountView called");
+		
+	    var accountuuid = $stateParams.uuid;
+
+		var global = this.global;
+		var self = this;
+		var app = this.getAppObject();
+		
+		var commonmodule = global.getModuleObject('common');
+		var commoncontrollers = commonmodule.getControllersObject();
+		
+		var session = commonmodule.getSessionObject();
+
+		var account = commoncontrollers.getAccountObjectFromUUID(session, accountuuid);
+
+		var ethaccount = [];
+		
+		if (account) {
+			ethaccount['uuid'] = account.getAccountUUID();
+
+			ethaccount['description'] = (account.getDescription() !== null ? account.getDescription() : account.getAddress());
+			ethaccount['type'] = (account.getPrivateKey() !== null ? global.t('personal') : global.t('3rd party'));
+			ethaccount['address'] = account.getAddress();
+			ethaccount['public_key'] = account.getPublicKey();
+			ethaccount['rsa_public_key'] = account.getRsaPublicKey();
+			
+		}
+		
+		$scope.ethaccount = ethaccount;
+	}
+	
+	
+	prepareTransactionHistoryView($scope, $state, $stateParams) {
+		console.log("Controllers.prepareEthAccountsView called");
+		
+		var global = this.global;
+		var commonmodule = global.getModuleObject('common');
+		var session = commonmodule.getSessionObject();
+		
+		var transactions = [];
+		
+		commonmodule.getTransactionList(function(err, transactionarray) {
+			
+			if (transactionarray) {
+				
+				for (var i = 0; i < transactionarray.length; i++) {
+					var tx = transactionarray[i];
+					var transaction = [];
+					
+					transaction.unixdate = new Date(tx.getCreationDate()).getTime() / 1000;
+					transaction.date = global.formatDate(new Date(tx.getCreationDate()), 'YYYY-mm-dd HH:MM:SS');
+					transaction.transactionuuid = tx.getTransactionUUID();
+					transaction.transactionhash = tx.getTransactionHash();
+					transaction.from = tx.getFrom();
+					transaction.to = tx.getTo();
+					transaction.ethervalue = parseFloat(tx.getValue());
+					transaction.value = ( transaction.ethervalue ? transaction.ethervalue.toFixed(2) + ' Ether' : '');
+					transaction.status = tx.getStatus();
+					
+					transactions.push(transaction);
+				}
+				
+				// sort descending order
+				transactions.sort(function(a,b) {return (b.unixdate - a.unixdate);});
+				
+				// tell scope a value has changed
+				$scope.$apply();
+			}
+			
+		});
+
+		$scope.transactions = transactions;
 	}
 	
 	
@@ -351,6 +631,9 @@ class Controllers {
 		console.log("Controllers.handleLoginSubmit called");
 		
 		var global = this.global;
+		var app = this.getAppObject();
+		var session = global.getModuleObject('common').getSessionObject();
+		
 
 		var result = [];
 		
@@ -367,13 +650,27 @@ class Controllers {
 			var privatekey = $scope.privatekey.text;
 			
 			this._impersonatePrivateKey(privatekey);
-		}
+			
+			var storagemodule = global.getModuleObject('storage-access');
+			var storageaccess = storagemodule.getStorageAccessInstance(session);
+			
+			storageaccess.account_session_keys( function(err, res) {
+				
+				if (res && res['keys']) {
+					var keys = res['keys'];
+					
+					session.readSessionAccountFromKeys(keys);
+				}
+		
+				app.refreshDisplay();
+			});
+			}
 
 		this.gotoHome();
 
 	}
 	
-	// login
+	// logout
 	prepareLogoutForm($scope) {
 		console.log("Controllers.prepareLogoutForm called");
 
@@ -426,6 +723,7 @@ class Controllers {
 	
 	_logout() {
 		var global = this.global;
+		var app = this.getAppObject();
 		var session = global.getModuleObject('common').getSessionObject();
 		
 		session.disconnectUser();
@@ -434,27 +732,353 @@ class Controllers {
 		
 	}
 
+	//
+	// ethereum accounts
+	//
+	
+	// add/import
+	prepareEthAccountForm($scope) {
+		console.log("Controllers.prepareEthAccountForm called");
+
+		var global = this.global;
+		var self = this;
+		
+		
+		// submit function
+		$scope.handleSubmit = function(){
+			self.handleEthAccountSubmit($scope);
+		}
+		
+		$scope.generatePrivateKey = function(){
+			self.generatePrivateKey($scope);
+		}
+	}
+	
+	generatePrivateKey($scope) {
+		console.log("Controllers.generatePrivateKey called");
+		
+		var global = this.global;
+		var commonmodule = global.getModuleObject('common');
+		var session = commonmodule.getSessionObject();
+		
+		var privkey = session.generatePrivateKey();		
+		
+		$scope.privatekey = {text: privkey};
+	}
+	
+	handleEthAccountSubmit($scope) {
+		console.log("Controllers.handleEthAccountSubmit called");
+		
+		var global = this.global;
+		var app = this.getAppObject();
+		
+		var commonmodule = global.getModuleObject('common');
+		var session = commonmodule.getSessionObject();
+		var sessionuser = session.getSessionUserObject();
+		
+		
+		var sessionaccount = global.getModuleObject('common').createBlankAccountObject();
+		
+		
+		var description = $scope.description.text;
+		
+		if ($scope.privatekey && $scope.privatekey.text && ($scope.privatekey.text.length > 0)) {
+			var privatekey = $scope.privatekey.text;
+			
+			sessionaccount.setPrivateKey(privatekey);
+			sessionaccount.setDescription(description);
+			
+			if (sessionuser) {
+				sessionaccount.setOwner(sessionuser);
+			}
+			
+			session.addAccountObject(sessionaccount);
+		}
+		else if ($scope.address && $scope.address.text && ($scope.address.text.length > 0)) {
+			var address = $scope.address.text;
+			
+			sessionaccount.setAddress(address);
+			sessionaccount.setDescription(description);
+			
+			session.addAccountObject(sessionaccount);
+		}
+		
+		// we save this account
+		var storagemodule = global.getModuleObject('storage-access');
+		var storageaccess = storagemodule.getStorageAccessInstance(session);
+		
+		storageaccess.user_add_account(sessionuser, sessionaccount, function() {
+			app.refreshDisplay();
+		});
+
+        app.refreshDisplay();
+	}
+	
+	// modify
+	prepareEthAccountModifyForm($scope, $state, $stateParams) {
+		console.log("Controllers.prepareEthAccountModifyForm called");
+		
+	    var accountuuid = $stateParams.uuid;
+
+
+		var global = this.global;
+		var self = this;
+		var app = this.getAppObject();
+		
+		var commonmodule = global.getModuleObject('common');
+		var commoncontrollers = commonmodule.getControllersObject();
+		
+		var session = commonmodule.getSessionObject();
+
+		var accountobject = commoncontrollers.getAccountObjectFromUUID(session, accountuuid);
+
+		
+		// filling fields
+		$scope.accountuuid = accountuuid;
+
+		$scope.description = {
+				text: (accountobject ? accountobject.getDescription() : null)
+		};
+		
+		
+		// calling hooks
+		var form = document.getElementById("modifyEthAccountForm");
+		
+		angular.element(document).ready(function () {
+			var result = [];
+			
+			var params = [];
+			
+			params.push($scope);
+			params.push(form);
+
+			var ret = global.invokeHooks('alterModifyEthAccountForm_hook', result, params);
+			
+			if (ret && result && result.length) {
+				console.log('modifyEthAccountForm overload handled by a module');			
+			}
+	    });
+		
+		// submit function
+		$scope.handleSubmit = function(){
+			self.handleEthAccountModifySubmit($scope);
+		}
+	}
+	
+	handleEthAccountModifySubmit($scope) {
+		console.log("Controllers.handleEthAccountModifySubmit called");
+		
+		
+		var accountuuid = $scope.accountuuid;
+		var description = $scope.description.text;
+
+		
+		var global = this.global;
+		var app = this.getAppObject();
+		
+		var commonmodule = global.getModuleObject('common');
+		var commoncontrollers = commonmodule.getControllersObject();
+
+		var session = commonmodule.getSessionObject();
+		var sessionuser = session.getSessionUserObject();
+		
+		// call hooks
+		var result = [];
+		
+		var params = [];
+		
+		params.push($scope);
+
+		var ret = global.invokeHooks('handleEthAccountModifySubmit_hook', result, params);
+		
+		if (ret && result && result.length) {
+			console.log('handleEthAccountModifySubmit_hook overloaded by a module');			
+		}
+		else {
+			var accountobject = commoncontrollers.getAccountObjectFromUUID(session, accountuuid);
+			
+			if (accountobject) {
+				accountobject.setDescription(description);
+				
+				// we save this account
+				var storagemodule = global.getModuleObject('storage-access');
+				var storageaccess = storagemodule.getStorageAccessInstance(session);
+				
+				storageaccess.user_update_account(sessionuser, accountobject, function() {
+					app.refreshDisplay();
+				});
+			}
+			
+		}
+		
+
+        app.refreshDisplay();
+	}
 	
 
+
+	// ether tranfer
+	prepareEtherTransferForm($scope) {
+		console.log("Controllers.prepareEtherTransferForm called");
+
+		var self = this;
+
+		// call module controller
+		var global = this.global;
+		
+		var commonmodule = global.getModuleObject('common');
+		var commoncontrollers = commonmodule.getControllersObject();
+
+		var session = commonmodule.getSessionObject();
+		
+		var divcue = document.getElementsByClassName('div-form-cue')[0];
+		
+		var values = commoncontrollers.getSessionTransferDefaultValues(session, divcue);
+		
+		// filling fields
+
+		$scope.walletused = {
+				text: (values['walletused'] ? values['walletused'] : null)
+		};
+		
+		$scope.password = {
+				text: null
+		};
+		
+		$scope.gaslimit = {
+				text: (values['gaslimit'] ? values['gaslimit'] : null)
+		};
+		
+		$scope.gasprice = {
+				text: (values['gasprice'] ? values['gasprice'] : null)
+		};
+
+		// calling hooks
+		var ethertransferform = document.getElementById("etherTransferForm");
+		
+		angular.element(document).ready(function () {
+			var result = [];
+			
+			var params = [];
+			
+			params.push($scope);
+			params.push(ethertransferform);
+
+			var ret = global.invokeHooks('alterEtherTransferForm_hook', result, params);
+			
+			if (ret && result && result.length) {
+				console.log('etherTransferForm overload handled by a module');			
+			}
+	    });
+		
+		// submit function
+		$scope.handleSubmit = function(){
+			self.handleEtherTransferSubmit($scope);
+		}
+	}
+	
+	handleEtherTransferSubmit($scope) {
+		console.log("Controllers.handleEtherTransferSubmit called");
+		
+		var global = this.global;
+		var commonmodule = global.getModuleObject('common');
+		var session = commonmodule.getSessionObject();
+
+		// call hooks
+		var result = [];
+		
+		var params = [];
+		
+		params.push($scope);
+
+		var ret = global.invokeHooks('handleEtherTransferSubmit_hook', result, params);
+		
+		if (ret && result && result.length) {
+			console.log('handleEtherTransferSubmit overloaded by a module');			
+		}
+		else {
+			var fromaddress = $scope.walletused.text;
+			var toaddress = $scope.to.text;
+			
+			var amount = $scope.amount.text;
+			
+			var password = $scope.password.text;
+			
+			var gaslimit = $scope.gaslimit.text;
+			var gasPrice = $scope.gasprice.text;
+			
+			
+			var commonmodule = global.getModuleObject('common');
+			var session = commonmodule.getSessionObject();
+			
+			var payingaccount = session.getAccountObject(fromaddress);
+			
+			// unlock account
+			payingaccount.unlock(password, 300); // 300s, but we can relock the account
+			
+			try {
+				var toaccount = session.getAccountObject(toaddress);
+				var transactionuuid = session.guid();
+
+				payingaccount.transferAmount(toaccount, amount, gaslimit, gasPrice,  transactionuuid, function (err, res) {
+					
+					if (!err) {
+						console.log('transfer registered at ' + res);
+						
+						app.setMessage("transfer has been registered at " + res);
+					}
+					else  {
+						console.log('error transfering ethers ' + err);
+					}
+						
+				});
+				
+				app.setMessage("ether transfercreated a pending transaction");
+				
+			}
+			catch(e) {
+				app.setMessage("Error: " + e);
+			}		
+		}
+	}
+
+
+	
 	//
 	// directives
 	//
 	
 	_impersonatePrivateKey(privatekey) {
 		var global = this.global;
-		var app = global.getAppObject();
+		var app = this.getAppObject();
 		
 		var session = global.getModuleObject('common').getSessionObject();
 
 		if (privatekey != null) {
 			
+			// we add this private key as one of the session's account to perform transactions
 			var sessionaccount = global.getModuleObject('common').createBlankAccountObject();
 			
 			sessionaccount.setPrivateKey(privatekey);
 			
+			var address = sessionaccount.getAddress();
+			sessionaccount.setAccountUUID(address);
+			
 			session.impersonateAccount(sessionaccount);
 			
 			console.log('is anonymous: ' + (session.isAnonymous() ? 'true' : 'false'));
+			
+			// we add this privatekey as one of the crypto key to save data
+			var sessioncryptokey = global.getModuleObject('common').createBlankCryptoKeyObject();
+			
+			sessioncryptokey.setPrivateKey(privatekey);
+			
+			var address = sessioncryptokey.getAddress();
+			sessioncryptokey.setKeyUUID(address);
+			
+			
+			session.addCryptoKeyObject(sessioncryptokey);
+
 			
 
 	        app.refreshDisplay();
@@ -462,11 +1086,53 @@ class Controllers {
 		
 	}
 	
+	//
+	// utilities
+	//
+	prepareWalletFormPart(session, $scope, $state, $stateParams) {
+		var global = session.getGlobalObject();
+		
+		var commonmodule = global.getModuleObject('common');
+		var commoncontrollers = commonmodule.getControllersObject();
+
+		var divcue = document.getElementsByClassName('div-form-cue')[0];
+		
+		var values = commoncontrollers.getSessionTransferDefaultValues(session, divcue);
+		
+		if (!session.isAnonymous()) {
+			
+			// we remove the password edit box
+			var passwordspan = document.getElementById('password-span');
+			
+			if ( passwordspan ) {
+				//passwordspan.parentNode.removeChild(passwordspan);
+			}
+		}
+
+		$scope.walletused = {
+				text: (values['walletused'] ? values['walletused'] : null)
+		};
+		
+		$scope.password = {
+				text: null
+		};
+		
+		$scope.gaslimit = {
+				text: (values['gaslimit'] ? values['gaslimit'] : null)
+		};
+		
+		$scope.gasprice = {
+				text: (values['gasprice'] ? values['gasprice'] : null)
+		};
+
+		
+	}
+	
 	showLoginBox(message) {
 		console.log("Controllers.showLoginBox called with message: " + JSON.stringify(message));
 
 		var global = this.global;
-		//var app = global.getAppObject();
+		//var app = this.getAppObject();
 		
 		//var session = global.getModuleObject('common').getSessionObject();
 		
@@ -502,7 +1168,7 @@ class Controllers {
 		var promptbox = false;
 		
 		var global = this.global;
-		var app = global.getAppObject();
+		var app = this.getAppObject();
 		
 		var session = global.getModuleObject('common').getSessionObject();
 
@@ -551,13 +1217,6 @@ class Controllers {
 	
 	getLoginLink(){  
 		console.log("Controllers.getLoginLink called");
-		/*var global = this.global;
-		var message = global.t("You are about to login on another system");
-		
-		return {
-	        restrict: 'E',
-	        template: "<a href='javascript:GlobalClass.getGlobalObject().getControllersObject().handleShowLoginBox(\"" + message + "\")' class=\"btn btn-block btn-social btn-github\"><i class=\"fa fa-github\"></i> Sign in with Github </a>"
-	    }*/
 		
 		var global = this.global;
 		var views = global.getModuleObject('mvc').getViewsObject();
@@ -567,18 +1226,6 @@ class Controllers {
 		
 		return {
 	        restrict: 'E',
-	        /*scope: {},
-	        link: function($scope, element, attrs) {
-	            if (element[0].tagName !== 'A') {
-	                return;  // simply do nothing (or raise an error)
-	            }
-	            element[0].href = 'javascript:alert("It works in 1.4.1, too!")';
-	            console.log('INVOKED');
-	            var elm = document.getElementById("loginlink");
-	            console.log("element is " + JSON.stringify(elm));
-	            elm.href = "javascript:GlobalClass.getGlobalObject().getModuleObject(\"mvc\").getControllersObject().handleShowLoginBox('')";
-	        },
-	        template: useridentifier*/
 	        template: loginwidget
 	    }	
 	}
@@ -594,54 +1241,6 @@ class Controllers {
 	        template: '<div>' + time + '</div>'
 	    }	
 	}
-
-
-	//
-	// TESTS BEGIN
-	
-	prepareClockView($scope, $timeout) {
-	    $scope.clock = "loading clock..."; // initialize the time variable
-	    $scope.date = "loading date...";
-	    $scope.tickInterval = 1000 //ms
-
-	    var tick = function() {
-	    	var now = new Date(); // get the current time
-	        $scope.clock = now.getTime();
-	        $scope.date = now.toISOString();
-	        $timeout(tick, $scope.tickInterval); // reset the timer
-	    }
-
-	    // Start the timer
-	    $timeout(tick, $scope.tickInterval);
-	}	
-
-	//
-	// Forms
-	//
-	prepareEmailForm($scope, $route, $routeParams) {
-		console.log("Controllers.prepareEmailForm called with route: " + JSON.stringify($route));
-
-		var self = this;
-		  
-		$scope.email = {
-				text: 'test@flexrun.com'
-		};
-		  
-		$scope.handleSubmit = function(){
-			self.handleEmailSubmit($scope, $route, $routeParams);
-		}
-		
-	}
-
-	handleEmailSubmit($scope, $route, $routeParams) {
-		console.log("Controllers.handleEmailSubmit called with route: " + JSON.stringify($route));
-		console.log("and route params: " + JSON.stringify($routeParams));
-
-		alert("Email is " + $scope.email.text);
-	}
-	
-	// TESTS END
-	//
 
 }
 

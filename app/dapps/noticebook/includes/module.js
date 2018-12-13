@@ -106,12 +106,29 @@ var Module = class {
 	//
 	
 	// notice book
-	getLocalPublicNoticeBooks(session, bForceRefresh) {
-		var global = this.global;
-		var commonmodule = global.getModuleObject('common');
-		var contracts = commonmodule.getContractsObject(bForceRefresh);
-		
+	_filterContracts(contracts) {
 		var array = [];
+		
+		if (!contracts)
+			return array;
+		
+		var locals = contracts.getContractObjectsArray();
+
+		for (var i = 0; i < locals.length; i++) {
+			var local = locals[i];
+			
+			if (local.getContractType() == 'PublicNoticeBook')
+			array.push(local);
+		}
+
+		return array;
+	}
+	
+	_filterLocalContracts(contracts) {
+		var array = [];
+		
+		if (!contracts)
+			return array;
 		
 		var locals = contracts.getLocalOnlyContractObjects();
 
@@ -122,6 +139,44 @@ var Module = class {
 			array.push(local);
 		}
 
+		return array;
+	}
+	
+	getPublicNoticeBooks(session, bForceRefresh, callback) {
+		var global = this.global;
+		var self = this;
+		
+		var commonmodule = global.getModuleObject('common');
+		
+		var contracts = commonmodule.getContractsObject(bForceRefresh, function(err, contracts) {
+			if (callback) {
+				var array = self._filterContracts(contracts);
+				
+				callback(null, array);
+			}
+		});
+		
+		var array = this._filterContracts(contracts);
+		
+		return array;
+	}
+	
+	getLocalPublicNoticeBooks(session, bForceRefresh, callback) {
+		var global = this.global;
+		var self = this;
+		
+		var commonmodule = global.getModuleObject('common');
+		
+		var contracts = commonmodule.getContractsObject(bForceRefresh, function(err, contracts) {
+			if (callback) {
+				var array = self._filterLocalContracts(contracts);
+				
+				callback(null, array);
+			}
+		});
+		
+		var array = this._filterContracts(contracts);
+		
 		return array;
 	}
 	
