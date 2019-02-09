@@ -9,7 +9,7 @@ var PublicNoticeBookLocalPersistor = class {
 		this.commonmodule = this.session.getGlobalObject().getModuleObject('common');
 	}
 	
-	savePublicNoticeBookJson(noticebook) {
+	savePublicNoticeBookJson(noticebook, callback) {
 		var session = this.session;
 		var keys = ['contracts'];
 		
@@ -26,9 +26,14 @@ var PublicNoticeBookLocalPersistor = class {
 		else {
 			commonmodule.insertLocalJsonLeaf(session, keys, null, null, json);
 		}
+		
+		// save contracts
+		var contractsjson = commonmodule.readLocalJson(session, keys); // from cache, since no refresh
+		
+		commonmodule.saveLocalJson(session, keys, contractsjson, callback);
 	}
 	
-	savePublicNoticeJson(notice) {
+	savePublicNoticeJson(notice, callback) {
 		var session = this.session;
 		var keys = ['contracts'];
 		
@@ -46,6 +51,11 @@ var PublicNoticeBookLocalPersistor = class {
 			var parentuuid = notice.getPublicNoticeBookObject().getUUID();
 			commonmodule.insertLocalJsonLeaf(session, keys, parentuuid, 'notices', json);
 		}
+		
+		// save contracts
+		var contractsjson = commonmodule.readLocalJson(session, keys); // from cache, since no refresh
+		
+		commonmodule.saveLocalJson(session, keys, contractsjson, callback);
 	}
 	
 }

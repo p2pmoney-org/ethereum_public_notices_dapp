@@ -151,10 +151,10 @@ var PublicNotice = class {
 		return json;
 	}
 	
-	saveLocalJson() {
+	saveLocalJson(callback) {
 		var persistor = this.getPublicNoticeBookObject().getContractLocalPersistor();
 		
-		persistor.savePublicNoticeJson(this);
+		persistor.savePublicNoticeJson(this, callback);
 	}
 	
 	getNoticeIndex() {

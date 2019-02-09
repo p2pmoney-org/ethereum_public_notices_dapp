@@ -180,12 +180,12 @@ var PublicNoticeBook = class {
 		return json;
 	}
 	
-	saveLocalJson() {
+	saveLocalJson(callback) {
 		console.log('PublicNoticeBook.saveLocalJson called for ' + this.address);
 
 		var persistor = this.getContractLocalPersistor();
 		
-		persistor.savePublicNoticeBookJson(this);
+		persistor.savePublicNoticeBookJson(this, callback);
 	}
 	
 	//
