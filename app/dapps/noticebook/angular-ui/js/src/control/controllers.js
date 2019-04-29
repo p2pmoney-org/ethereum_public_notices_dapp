@@ -155,38 +155,56 @@ var DAPPControllers = class {
 		this.noticetype_partials['tender']['view']['item'] = './partials/tender-view-form';
 	}
 	
-	registerStates($stateProvider) {
-		var global = this.global;
+	getStates() {
+		var statearray = [];
 		
-		$stateProvider
-	    .state('home.onthewire', {url: '/onthewire', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/onthewire.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Notice Books') }})
-	    .state('home.noticebooks', {url: '/noticebooks', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/public-noticebooks.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Notice Books') }})
-	    .state('home.noticebooks.create', {url: '/create', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-create.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Create') }})
-	    .state('home.noticebooks.import', {url: '/import', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-import.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Import') }})
-	    .state('home.noticebooks.modify', {url: '/modify/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-modify.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Modify') }})
-	    .state('home.noticebooks.deploy', {url: '/deploy/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-deploy.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Publish') }})
-	    .state('home.noticebooks.view', {url: '/view/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/noticebook-view.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('View') }})
-	    .state('home.noticebooks.delete', {url: '/delete/:index', views: {'main@': {controller: "NoticeBookRemoveRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Delete') }})
-	    .state('home.noticebooks.notices', {url: '/notices/:index', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/public-notices.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Notices') }})
-	    .state('home.noticebooks.notices.create', {url: '/create/:type', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-create.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Create') }})
-	    .state('home.noticebooks.notices.modify', {url: '/modify/:number', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-modify.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Modify') }})
-	    .state('home.noticebooks.notices.deploy', {url: '/deploy/:number', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-deploy.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Publish') }})
-	    .state('home.noticebooks.notices.view', {url: '/view/:number', views: {'main@': {templateUrl: './dapps/noticebook/angular-ui/templates/notice-view.html', controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('View') }})
-	    .state('home.noticebooks.notices.delete', {url: '/delete/:number', views: {'main@': {controller: "NoticeRemoveRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Delete') }})
+		var global = this.global;
+		var app = this.app;
+		
+		statearray
+	    .push(['home.onthewire', {url: '/onthewire', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/onthewire.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Notice Books') }});
+		statearray
+	    .push(['home.noticebooks', {url: '/noticebooks', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/public-noticebooks.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Notice Books') }});
+		statearray
+	    .push(['home.noticebooks.create', {url: '/create', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-create.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Create') }});
+		statearray
+	    .push(['home.noticebooks.import', {url: '/import', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-import.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Import') }});
+		statearray
+	    .push(['home.noticebooks.modify', {url: '/modify/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-modify.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Modify') }});
+		statearray
+	    .push(['home.noticebooks.deploy', {url: '/deploy/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-deploy.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Publish') }});
+		statearray
+	    .push(['home.noticebooks.view', {url: '/view/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-view.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('View') }});
+		statearray
+	    .push(['home.noticebooks.delete', {url: '/delete/:index', views: {'main@': {controller: "NoticeBookRemoveRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Delete') }});
+		statearray
+	    .push(['home.noticebooks.notices', {url: '/notices/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/public-notices.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Notices') }});
+		statearray
+	    .push(['home.noticebooks.notices.create', {url: '/create/:type', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-create.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Create') }});
+		statearray
+	    .push(['home.noticebooks.notices.modify', {url: '/modify/:number', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-modify.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Modify') }});
+		statearray
+	    .push(['home.noticebooks.notices.deploy', {url: '/deploy/:number', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-deploy.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Publish') }});
+		statearray
+	    .push(['home.noticebooks.notices.view', {url: '/view/:number', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-view.html'), controller: "PageRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('View') }});
+		statearray
+	    .push(['home.noticebooks.notices.delete', {url: '/delete/:number', views: {'main@': {controller: "NoticeRemoveRequestHandler",}},
+	        ncyBreadcrumb: { label: global.t('Delete') }});
+		
+		return statearray;
 	}
 	
 	//
