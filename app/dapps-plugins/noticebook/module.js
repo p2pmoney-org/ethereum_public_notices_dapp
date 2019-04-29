@@ -49,6 +49,18 @@ var Module = class {
 	hasLoadStarted() {
 		return this.isloading;
 	}
+	
+	// optional  module functions
+	postRegisterModule() {
+		if (!this.isloading) {
+			var global = this.global;
+			var rootscriptloader = global.getRootScriptLoader();
+			
+			this.loadModule(rootscriptloader);
+		}
+	}
+	
+
 
 }
 

@@ -19,8 +19,10 @@ var ModuleControllers = class {
 		var module = this.module;
 		var global = module.global;
 		var session = global.getModuleObject('common').getSessionObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = session.getContractsObject();
+		
+		var contracts = ethnodemodule.getContractsObject();
 		
 		
 		var contract = contracts.createBlankContractObject('PublicNoticeBook');
@@ -43,8 +45,10 @@ var ModuleControllers = class {
 		
 		var commonmodule = global.getModuleObject('common');
 		var session = commonmodule.getSessionObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = session.getContractsObject();
+		var contracts = ethnodemodule.getContractsObject();
+		
 		
 		var contractindex = contract.getContractIndex();
 		var contractuuid = contract.getUUID();
@@ -53,7 +57,7 @@ var ModuleControllers = class {
 			// insert
 			contracts.addContractObject(contract);
 			
-			session.saveContractObjects(contracts);
+			ethnodemodule.saveContractObjects(contracts);
 		}
 		else {
 			// update
@@ -68,10 +72,12 @@ var ModuleControllers = class {
 		
 		var commonmodule = global.getModuleObject('common');
 		var session = commonmodule.getSessionObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = session.getContractsObject();
+		var contracts = ethnodemodule.getContractsObject();
+		
 
-		session.saveContractObjects(contracts);
+		ethnodemodule.saveContractObjects(contracts);
 	}
 
 	getPublicNoticeBookFromKey(contractindex) {
@@ -80,8 +86,10 @@ var ModuleControllers = class {
 		var module = this.module;
 		var global = module.global;
 		var session = global.getModuleObject('common').getSessionObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = session.getContractsObject();
+		
+		var contracts = ethnodemodule.getContractsObject();
 		
 		
 		var contract = contracts.getContractObjectFromKey(contractindex);

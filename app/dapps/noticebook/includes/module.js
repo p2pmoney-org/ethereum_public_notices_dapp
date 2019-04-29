@@ -22,8 +22,22 @@ var Module = class {
 	loadModule(parentscriptloader, callback) {
 		console.log('loadModule called for module ' + this.name);
 
-		if (this.isloading)
+		if (this.isready) {
+			if (callback)
+				callback(null, this);
+			
 			return;
+		}
+
+		if (this.isloading) {
+			var error = 'calling loadModule while still loading for module ' + this.name;
+			console.log('error: ' + error);
+			
+			if (callback)
+				callback(error, null);
+			
+			return;
+		}
 			
 		this.isloading = true;
 
@@ -73,14 +87,15 @@ var Module = class {
 		var global = this.global;
 
 		var commonmodule = this.global.getModuleObject('common');
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = commonmodule.getContractsObject();
+		var contracts = ethnodemodule.getContractsObject();
 		
 		// register PublicNoticeBook in the contracts global object
 		contracts.registerContractClass('PublicNoticeBook', this.PublicNoticeBook);
 		
 		// force refresh of list
-		commonmodule.getContractsObject(true);
+		ethnodemodule.getContractsObject(true);
 
 		result.push({module: 'noticebook', handled: true});
 		
@@ -147,8 +162,9 @@ var Module = class {
 		var self = this;
 		
 		var commonmodule = global.getModuleObject('common');
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = commonmodule.getContractsObject(bForceRefresh, function(err, contracts) {
+		var contracts = ethnodemodule.getContractsObject(bForceRefresh, function(err, contracts) {
 			if (callback) {
 				var array = self._filterContracts(contracts);
 				
@@ -166,8 +182,9 @@ var Module = class {
 		var self = this;
 		
 		var commonmodule = global.getModuleObject('common');
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = commonmodule.getContractsObject(bForceRefresh, function(err, contracts) {
+		var contracts = ethnodemodule.getContractsObject(bForceRefresh, function(err, contracts) {
 			if (callback) {
 				var array = self._filterLocalContracts(contracts);
 				
@@ -183,8 +200,9 @@ var Module = class {
 	getChainPublicNoticeBooks(session, bForceRefresh) {
 		var global = this.global;
 		var commonmodule = global.getModuleObject('common');
+		var ethnodemodule = global.getModuleObject('ethnode');
 		
-		var contracts = commonmodule.getContractsObject(bForceRefresh);
+		var contracts = ethnodemodule.getContractsObject(bForceRefresh);
 		
 		var array = [];
 		

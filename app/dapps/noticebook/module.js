@@ -33,8 +33,22 @@ var Module = class {
 	loadModule(parentscriptloader, callback) {
 		console.log('loadModule called for module ' + this.name);
 
-		if (this.isloading)
+		if (this.isready) {
+			if (callback)
+				callback(null, this);
+			
 			return;
+		}
+
+		if (this.isloading) {
+			var error = 'calling loadModule while still loading for module ' + this.name;
+			console.log('error: ' + error);
+			
+			if (callback)
+				callback(error, null);
+			
+			return;
+		}
 			
 		this.isloading = true;
 
@@ -51,6 +65,8 @@ var Module = class {
 		
 		// plug-ins
 		modulescriptloader.push_script( './dapps-plugins/noticebook/module.js', function() {
+			// load module if initialization has finished
+			if (global.isReady())
 			global.loadModule('noticebook-dapp-plugins', modulescriptloader);
 		 });
 
@@ -82,6 +98,8 @@ var Module = class {
 		
 		//noticebook
 		dappsmodelsloader.push_script( moduleroot + '/includes/module.js', function() {
+			// load module if initialization has finished
+			if (global.isReady())
 			global.loadModule('noticebook', dappsmodelsloader);
 		 });
 		

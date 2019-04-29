@@ -3,7 +3,7 @@
 var PublicNoticeBook = class {
 	
 	// "constants"
-	static get STATUS_LOST() { return -100;}	
+	/*static get STATUS_LOST() { return -100;}	
 
 	static get STATUS_NOT_FOUND() { return -20;}	
 	static get STATUS_UNKOWN() { return -10;}	
@@ -17,7 +17,7 @@ var PublicNoticeBook = class {
 	static get STATUS_CANCELLED() { return 300;}	
 	static get STATUS_REJECTED() { return 400;}	
 	
-	static get STATUS_ON_CHAIN() { return 1000;}	
+	static get STATUS_ON_CHAIN() { return 1000;}*/	
 
 	constructor(session, contractaddress) {
 		this.session = session;
@@ -57,7 +57,17 @@ var PublicNoticeBook = class {
 		// operating variables
 		this.contractlocalpersistor = null;
 		this.contractinterface = null;
-	}
+		
+		// Contracts class
+		var global = session.getGlobalObject();
+		var commonmodule = global.getModuleObject('common');
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		this.Contracts = ethnodemodule.Contracts;
+		
+		this.savedstatus = this.Contracts.STATUS_LOCAL;
+		
+		this.livestatus = this.Contracts.STATUS_LOCAL;	}
 
 	getAddress() {
 		return this.address;
@@ -367,11 +377,42 @@ var PublicNoticeBook = class {
 	}
 	
 	getStatus() {
-		return this.status;
+		// 4 local saved status STATUS_LOCAL, STATUS_LOST, STATUS_CANCELLED, STATUS_REJECTED
+		// 2 local saved transient status STATUS_SENT, STATUS_PENDING
+		// 1 chain saved status STATUS_DEPLOYED
+		return this.savedstatus;
+	}
+	
+	getLiveStatus() {
+		// 3 local live status STATUS_LOCAL, STATUS_SENT, STATUS_PENDING
+		// 2 chain live status STATUS_NOT_FOUND, STATUS_ON_CHAIN
+		return this.livestatus;
+	}
+	
+	setStatus(status) {
+		switch(status) {
+			case this.Contracts.STATUS_LOST:
+			case this.Contracts.STATUS_LOCAL:
+			case this.Contracts.STATUS_SENT:
+			case this.Contracts.STATUS_PENDING:
+			case this.Contracts.STATUS_DEPLOYED:
+			case this.Contracts.STATUS_CANCELLED:
+			case this.Contracts.STATUS_REJECTED:
+				this.savedstatus = status;
+				break;
+			default:
+				// do not change for a unknown status
+				break;
+		}
 	}
 	
 	checkStatus(callback) {
-		if (this.address == null) {
+		var Contracts = this.Contracts;
+		var chaintestfunction = (this.getChainContractVersion).bind(this);
+		var contractinstance = this.getContractInterface().getContractInstance();
+		
+		return Contracts.checkStatus(this, chaintestfunction, contractinstance, callback);
+		/*if (this.address == null) {
 			var status = this.getStatus();
 			
 			if (callback)
@@ -419,7 +460,7 @@ var PublicNoticeBook = class {
 				callback(null, status);
 			
 			return status;
-		});
+		});*/
 	}
 	
 	setStatus(status) {

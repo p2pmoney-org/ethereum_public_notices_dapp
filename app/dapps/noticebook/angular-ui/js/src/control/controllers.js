@@ -21,6 +21,8 @@ var DAPPControllers = class {
 	}
 	
 	registerControllers(app) {
+		this.app = app;
+
 		var global = this.global;
 		
 		var angular_app = app.getAngularApp();
@@ -163,46 +165,46 @@ var DAPPControllers = class {
 		
 		statearray
 	    .push(['home.onthewire', {url: '/onthewire', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/onthewire.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Notice Books') }});
+	        ncyBreadcrumb: { label: global.t('Notice Books') }}]);
 		statearray
 	    .push(['home.noticebooks', {url: '/noticebooks', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/public-noticebooks.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Notice Books') }});
+	        ncyBreadcrumb: { label: global.t('Notice Books') }}]);
 		statearray
 	    .push(['home.noticebooks.create', {url: '/create', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-create.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Create') }});
+	        ncyBreadcrumb: { label: global.t('Create') }}]);
 		statearray
 	    .push(['home.noticebooks.import', {url: '/import', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-import.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Import') }});
+	        ncyBreadcrumb: { label: global.t('Import') }}]);
 		statearray
 	    .push(['home.noticebooks.modify', {url: '/modify/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-modify.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Modify') }});
+	        ncyBreadcrumb: { label: global.t('Modify') }}]);
 		statearray
 	    .push(['home.noticebooks.deploy', {url: '/deploy/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-deploy.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Publish') }});
+	        ncyBreadcrumb: { label: global.t('Publish') }}]);
 		statearray
 	    .push(['home.noticebooks.view', {url: '/view/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/noticebook-view.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('View') }});
+	        ncyBreadcrumb: { label: global.t('View') }}]);
 		statearray
 	    .push(['home.noticebooks.delete', {url: '/delete/:index', views: {'main@': {controller: "NoticeBookRemoveRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Delete') }});
+	        ncyBreadcrumb: { label: global.t('Delete') }}]);
 		statearray
 	    .push(['home.noticebooks.notices', {url: '/notices/:index', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/public-notices.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Notices') }});
+	        ncyBreadcrumb: { label: global.t('Notices') }}]);
 		statearray
 	    .push(['home.noticebooks.notices.create', {url: '/create/:type', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-create.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Create') }});
+	        ncyBreadcrumb: { label: global.t('Create') }}]);
 		statearray
 	    .push(['home.noticebooks.notices.modify', {url: '/modify/:number', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-modify.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Modify') }});
+	        ncyBreadcrumb: { label: global.t('Modify') }}]);
 		statearray
 	    .push(['home.noticebooks.notices.deploy', {url: '/deploy/:number', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-deploy.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Publish') }});
+	        ncyBreadcrumb: { label: global.t('Publish') }}]);
 		statearray
 	    .push(['home.noticebooks.notices.view', {url: '/view/:number', views: {'main@': {templateUrl: app.getHtmlUrl('./dapps/noticebook/angular-ui/templates/notice-view.html'), controller: "PageRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('View') }});
+	        ncyBreadcrumb: { label: global.t('View') }}]);
 		statearray
 	    .push(['home.noticebooks.notices.delete', {url: '/delete/:number', views: {'main@': {controller: "NoticeRemoveRequestHandler",}},
-	        ncyBreadcrumb: { label: global.t('Delete') }});
+	        ncyBreadcrumb: { label: global.t('Delete') }}]);
 		
 		return statearray;
 	}
@@ -223,7 +225,9 @@ var DAPPControllers = class {
 	    
 		var commonmodule = global.getModuleObject('common');
 		var session = commonmodule.getSessionObject();
-		var contracts = session.getContractsObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		var contracts = ethnodemodule.getContractsObject();
 	    
 		var noticebookmodule = global.getModuleObject('noticebook');
 		var noticebookcontrollers = noticebookmodule.getControllersObject();
@@ -234,7 +238,7 @@ var DAPPControllers = class {
 			if (confirm('Are you sure you want to remove "' + noticebookcontract.getLocalDescription() + '"?')) {
 				contracts.removeContractObject(noticebookcontract);
 
-				session.saveContractObjects(contracts);
+				ethnodemodule.saveContractObjects(contracts);
 			}
 		}
 		else {
@@ -253,7 +257,9 @@ var DAPPControllers = class {
 	    var global = this.global;
 	    
 		var commonmodule = global.getModuleObject('common');
-		var contracts = commonmodule.getContractsObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		var contracts = ethnodemodule.getContractsObject();
 	    
 		var noticebookmodule = global.getModuleObject('noticebook');
 		var noticebookcontrollers = noticebookmodule.getControllersObject();
@@ -337,11 +343,18 @@ var DAPPControllers = class {
 				}
 				
 				var refresh = false;
-		    	var newstatus = contract.getStatus();
+		    	var newstatus = contract.getLiveStatus();
 
 		    	if (newstatus != oldstatus) {
-		    		noticebook.statusstring = views.getPublicNoticeStatusString(contract);
+		    		noticebook.statusstring = views.getPublicNoticeLiveStatusString(contract);
 		    		refresh = true;
+		    		
+		    		// save notice book
+		    		var noticebookmodule = global.getModuleObject('noticebook');
+		    		
+		    		var noticebookcontrollers = noticebookmodule.getControllersObject();
+		    		
+		    		noticebookcontrollers.savePublicNoticeBookObject(contract);  	
 		    	}
 				
 				// tell scope a value has changed
@@ -822,7 +835,7 @@ var DAPPControllers = class {
 		
 		var global = this.global;
 		
-		var chainreadermodule = global.getModuleObject('chainreader');
+		var chainreadermodule = global.getModuleObject('ethchainreader');
 		var chainreadercontrollers = chainreadermodule.getControllersObject();
 		
 		loopnum++;
@@ -1142,7 +1155,10 @@ var DAPPControllers = class {
 		var commonmodule = global.getModuleObject('common');
 		var commoncontrollers = commonmodule.getControllersObject();
 
-		var values = commoncontrollers.getContractDeploymentDefaultValues(noticebookcontract, divcue);
+		var ethnodemodule = global.getModuleObject('ethnode');
+		var ethnodecontrollers = ethnodemodule.getControllersObject();
+
+		var values = ethnodecontrollers.getContractDeploymentDefaultValues(noticebookcontract, divcue);
 
 		// filling fields
 		var noticebook = [];
@@ -1193,7 +1209,9 @@ var DAPPControllers = class {
 		
 		
 		var commonmodule = global.getModuleObject('common');
-		var contracts = commonmodule.getContractsObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		var contracts = ethnodemodule.getContractsObject();
 		
 		var noticebookmodule = global.getModuleObject('noticebook');
 		var noticebookcontrollers = noticebookmodule.getControllersObject();
@@ -1210,7 +1228,7 @@ var DAPPControllers = class {
 			var payingaccount = commonmodule.getAccountObject(wallet);
 			
 			// unlock account
-			payingaccount.unlock(password, 300); // 300s, but we can relock the account
+			ethnodemodule.unlockAccount(payingaccount, password, 300); // 300s, but we can relock the account
 			
 			// check that current session impersonates the contract's owner
 			
@@ -1305,7 +1323,9 @@ var DAPPControllers = class {
 		// common module
 		var commonmodule = global.getModuleObject('common');
 		var session = commonmodule.getSessionObject();
-		var contracts = session.getContractsObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		var contracts = ethnodemodule.getContractsObject();
 
 		// noticebook module
 		var noticebookmodule = global.getModuleObject('noticebook');
@@ -1409,7 +1429,9 @@ var DAPPControllers = class {
 
 		// common module
 		var commonmodule = global.getModuleObject('common');
-		var contracts = commonmodule.getContractsObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		var contracts = ethnodemodule.getContractsObject();
 
 		// noticebook module
 		var noticebookmodule = global.getModuleObject('noticebook');
@@ -1469,7 +1491,10 @@ var DAPPControllers = class {
 		var commonmodule = global.getModuleObject('common');
 		var commoncontrollers = commonmodule.getControllersObject();
 
-		var values = commoncontrollers.getContractDeploymentDefaultValues(noticebookcontract, divcue);
+		var ethnodemodule = global.getModuleObject('ethnode');
+		var ethnodecontrollers = ethnodemodule.getControllersObject();
+
+		var values = ethnodecontrollers.getContractDeploymentDefaultValues(noticebookcontract, divcue);
 
 		// filling fields
 		var noticebook = [];
@@ -1529,7 +1554,9 @@ var DAPPControllers = class {
 		
 		
 		var commonmodule = global.getModuleObject('common');
-		var contracts = commonmodule.getContractsObject();
+		var ethnodemodule = global.getModuleObject('ethnode');
+		
+		var contracts = ethnodemodule.getContractsObject();
 
 		var noticebookmodule = global.getModuleObject('noticebook');
 		var noticebookcontrollers = noticebookmodule.getControllersObject();
@@ -1555,7 +1582,7 @@ var DAPPControllers = class {
 						var payingaccount = commonmodule.getAccountObject(wallet);
 						
 						// unlock account
-						payingaccount.unlock(password, 300); // 300s, but we can relock the account
+						ethnodemodule.unlockAccount(payingaccount, password, 300); // 300s, but we can relock the account
 						
 						// check that current session impersonates the contract's owner
 						
